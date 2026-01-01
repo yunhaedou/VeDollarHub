@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexHost Admin Panel</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.8);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --text-main: #f8fafc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        /* --- LOGIN CONTAINER --- */
+        #login-section {
+            margin-top: 10vh;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* --- DASHBOARD CONTAINER --- */
+        #dashboard-section {
+            display: none; /* Hidden by default */
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h2, h3 { margin-bottom: 20px; }
+
+        /* --- FORMS --- */
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-size: 12px; margin-bottom: 5px; color: #94a3b8; }
+        
+        .input-field, select, textarea {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+        }
+        
+        .input-field:focus { border-color: var(--primary); }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            color: white;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); width: 100%; }
+        .btn-danger { background: var(--danger); }
+        .btn-edit { background: #f59e0b; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* --- TABLE --- */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+        th { color: var(--secondary); font-weight: 600; }
+        
+        .action-buttons { display: flex; gap: 10px; }
+        .action-buttons button { padding: 5px 10px; font-size: 12px; }
+
+        /* --- HEADER DASHBOARD --- */
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-section" class="glass-card">
+        <h2 style="color: var(--primary);">Admin Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email Admin</label>
+                <input type="email" id="loginEmail" class="input-field" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPass" class="input-field" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Masuk</button>
+        </form>
+    </div>
+
+    <div id="dashboard-section">
+        <div class="dash-header">
+            <h2><i class="fas fa-cogs"></i> Panel Produk</h2>
+            <button onclick="logout()" class="btn btn-danger" style="width: auto;">Logout</button>
+        </div>
+
+        <div class="glass-card">
+            <h3 id="formTitle">Tambah Produk Baru</h3>
+            <form id="productForm">
+                <input type="hidden" id="productId"> <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Nama Produk</label>
+                        <input type="text" id="pName" class="input-field" placeholder="Contoh: Paket Sultan" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Harga (Rp)</label>
+                        <input type="text" id="pPrice" class="input-field" placeholder="Contoh: 15.000" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="pCategory" class="input-field">
+                        <option value="botwa">Bot WhatsApp</option>
+                        <option value="bottg">Bot Telegram</option>
+                        <option value="mc">Minecraft Server</option>
+                        <option value="samp">GTA SAMP Server</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Deskripsi Singkat</label>
+                    <input type="text" id="pDesc" class="input-field" placeholder="Contoh: 30 Hari, Auto Reply..." required>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-primary">Simpan Produk</button>
+                <button type="button" id="cancelBtn" onclick="resetForm()" class="btn" style="background: #475569; margin-top: 10px; display: none;">Batal Edit</button>
+            </form>
+        </div>
+
+        <div class="glass-card">
+            <h3>Daftar Produk Aktif</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kategori</th>
+                            <th>Nama Produk</th>
+                            <th>Harga</th>
+                            <th>Deskripsi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- KONFIGURASI FIREBASE ---
+        // GANTI BAGIAN INI DENGAN CONFIG DARI PROJECT FIREBASE KAMU
+        const firebaseConfig = {
+            apiKey: "PASTE_API_KEY_DISINI",
+            authDomain: "PROJECT_ID.firebaseapp.com",
+            projectId: "PROJECT_ID",
+            storageBucket: "PROJECT_ID.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- AUTHENTICATION LOGIC ---
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const loginForm = document.getElementById('loginForm');
+
+        // Cek status login real-time
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginSection.style.display = 'none';
+                dashboardSection.style.display = 'block';
+                loadProducts(); // Load data saat login
+            } else {
+                loginSection.style.display = 'block';
+                dashboardSection.style.display = 'none';
+            }
+        });
+
+        // Login Function
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+
+            signInWithEmailAndPassword(auth, email, pass)
+                .then(() => {
+                    showToast("Login Berhasil!", "success");
+                })
+                .catch((error) => {
+                    showToast("Login Gagal: " + error.message, "error");
+                });
+        });
+
+        // Logout Function
+        window.logout = () => {
+            signOut(auth).then(() => showToast("Berhasil Logout", "success"));
+        }
+
+        // --- CRUD PRODUCT LOGIC ---
+        const productForm = document.getElementById('productForm');
+        const tableBody = document.getElementById('productTableBody');
+        let isEditing = false;
+
+        // 1. CREATE / UPDATE
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('productId').value;
+            const data = {
+                name: document.getElementById('pName').value,
+                price: document.getElementById('pPrice').value,
+                category: document.getElementById('pCategory').value,
+                description: document.getElementById('pDesc').value,
+                createdAt: new Date()
+            };
+
+            try {
+                if (isEditing && id) {
+                    // Update Mode
+                    await updateDoc(doc(db, "products", id), data);
+                    showToast("Produk berhasil diupdate!", "success");
+                } else {
+                    // Create Mode
+                    await addDoc(collection(db, "products"), data);
+                    showToast("Produk baru ditambahkan!", "success");
+                }
+                resetForm();
+            } catch (e) {
+                showToast("Error: " + e.message, "error");
+            }
+        });
+
+        // 2. READ (Realtime Listener)
+        function loadProducts() {
+            const q = query(collection(db, "products"), orderBy("category"));
+            
+            onSnapshot(q, (snapshot) => {
+                tableBody.innerHTML = "";
+                snapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const row = `
+                        <tr>
+                            <td><span style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:4px; font-size:10px;">${item.category.toUpperCase()}</span></td>
+                            <td style="font-weight:bold;">${item.name}</td>
+                            <td style="color:var(--secondary);">${item.price}</td>
+                            <td style="color:#94a3b8;">${item.description}</td>
+                            <td class="action-buttons">
+                                <button onclick="editProduct('${doc.id}', '${item.name}', '${item.price}', '${item.category}', '${item.description}')" class="btn btn-edit"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteProduct('${doc.id}')" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            });
+        }
+
+        // 3. PREPARE EDIT
+        window.editProduct = (id, name, price, category, desc) => {
+            document.getElementById('productId').value = id;
+            document.getElementById('pName').value = name;
+            document.getElementById('pPrice').value = price;
+            document.getElementById('pCategory').value = category;
+            document.getElementById('pDesc').value = desc;
+            
+            // Ubah UI
+            document.getElementById('formTitle').innerText = "Edit Produk";
+            document.getElementById('submitBtn').innerText = "Update Produk";
+            document.getElementById('cancelBtn').style.display = "inline-block";
+            isEditing = true;
+            
+            // Scroll ke atas
+            window.scrollTo(0,0);
+        }
+
+        // 4. DELETE
+        window.deleteProduct = async (id) => {
+            if(confirm("Yakin ingin menghapus produk ini?")) {
+                await deleteDoc(doc(db, "products", id));
+                showToast("Produk dihapus", "success");
+            }
+        }
+
+        // HELPER: Reset Form
+        window.resetForm = () => {
+            productForm.reset();
+            document.getElementById('productId').value = "";
+            document.getElementById('formTitle').innerText = "Tambah Produk Baru";
+            document.getElementById('submitBtn').innerText = "Simpan Produk";
+            document.getElementById('cancelBtn').style.display = "none";
+            isEditing = false;
+        }
+
+        // HELPER: Toast Notification
+        function showToast(msg, type) {
+            Toastify({
+                text: msg,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: type === "success" ? "#22c55e" : "#ef4444",
+                stopOnFocus: true,
+            }).showToast();
+        }
+    </script>
+</body>
+</html>
