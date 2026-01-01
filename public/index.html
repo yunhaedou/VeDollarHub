@@ -214,14 +214,16 @@
 
         // --- 1. KONFIGURASI FIREBASE ---
         // PASTE CONFIG DARI PROJECT FIREBASE KAMU DI SINI
-        const firebaseConfig = {
-            apiKey: "PASTE_API_KEY_DISINI",
-            authDomain: "PROJECT_ID.firebaseapp.com",
-            projectId: "PROJECT_ID",
-            storageBucket: "PROJECT_ID.appspot.com",
-            messagingSenderId: "SENDER_ID",
-            appId: "APP_ID"
-        };
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34",
+  authDomain: "vedollar-hub.firebaseapp.com",
+  projectId: "vedollar-hub",
+  storageBucket: "vedollar-hub.firebasestorage.app",
+  messagingSenderId: "1091182084872",
+  appId: "1:1091182084872:web:d38ba494182e8cebcba2bd",
+  measurementId: "G-Y7JXCTLN9Q"
+};
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
