@@ -2,23 +2,26 @@ import { db } from './utils/firebase.js';
 import { ensurePteroUser, createPteroServer } from './utils/ptero.js';
 
 export default async function handler(req, res) {
+    // 1. Cek Method
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
     const data = req.body;
-    
-    // 1. VALIDASI SIGNATURE PAYKASIR (WAJIB!)
-    // Cek dokumentasi Paykasir untuk validasi signature agar tidak di-hack.
-    // Contoh dummy check:
-    // if (data.secret_key !== process.env.PAYKASIR_CALLBACK_KEY) return res.status(403).send('Invalid Key');
+    console.log("Webhook Received:", data); // Untuk cek di Log Vercel
 
-    const orderId = data.order_id; 
-    const status = data.status; // Misal: 'success' atau 'paid'
+    // 2. Ambil Data dari Paykasir
+    // Paykasir biasanya mengirim: order_id, status, dll.
+    const orderId = data.order_id || data.trx_id; 
+    const status = data.status; 
 
-    if (status === 'success' || status === 'paid') {
+    // 3. Logic Validasi Sederhana
+    // Karena tidak ada secret key, kita validasi by Order ID di database
+    if (!orderId) return res.status(400).send('No Order ID');
+
+    if (status === 'success' || status === 'paid' || status === 'settlement') {
         const orderRef = db.collection('orders').doc(orderId);
         const orderSnap = await orderRef.get();
 
-        if (!orderSnap.exists) return res.status(404).send('Order not found');
+        if (!orderSnap.exists) return res.status(404).send('Order not found in DB');
         const orderData = orderSnap.data();
 
         // Cek supaya tidak diproses 2x
@@ -36,22 +39,17 @@ export default async function handler(req, res) {
             });
 
             // C. Create Pterodactyl Server
-            // Asumsi: Nama produk mengandung info RAM, misal "MC Stone (4GB)"
-            // Kita ambil angka 4096 dari nama produk atau set manual di frontend logic.
-            // Untuk simpelnya, kita set default 1024MB dulu disini.
+            // Default RAM 1GB (1024) jika tidak ada di nama produk
             const ramSize = 1024; 
             
-            const serverInfo = await createPteroServer(pteroUserId, orderData.category, ramSize);
+            await createPteroServer(pteroUserId, orderData.category, ramSize);
 
-            // D. (Opsional) Kirim WA Notif disini
-            console.log("Server Created:", serverInfo.uuid);
-
-            return res.status(200).json({ success: true, server_id: serverInfo.id });
+            return res.status(200).json({ success: true });
 
         } catch (error) {
             console.error("Auto-Create Failed:", error);
-            await orderRef.update({ status: 'FAILED_PROVISION', error: error.message });
-            return res.status(500).send('Provisioning Failed');
+            // Jangan update status FAILED agar admin bisa retry manual jika mau
+            return res.status(500).send('Provisioning Failed: ' + error.message);
         }
     }
 
