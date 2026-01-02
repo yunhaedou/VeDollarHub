@@ -350,7 +350,7 @@
         fetchAndRenderProducts();
 
         // --- 3. LOGIC CHECKOUT (FIXED: USING API QR SERVER) ---
-        // FUNGSI CHECKOUT (VERSI GOOGLE API + DEBUG MODE)
+        // FUNGSI CHECKOUT (VERSI QUICKCHART - STABIL & CEPAT)
         window.processCheckout = async function() {
             const btn = document.querySelector('.btn-checkout');
             const username = document.getElementById('inpUsername').value;
@@ -389,17 +389,17 @@
                     
                     const qrContainer = document.getElementById('qrCodePlace');
                     
-                    // --- PERBAIKAN: GUNAKAN GOOGLE CHART API (LEBIH STABIL) ---
-                    // chld=L|2 artinya: Low Error Correction (Titik lebih besar/renggang) | Margin 2
-                    // Ini membuat QR Code lebih mudah dibaca oleh kamera HP
-                    const googleQrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(result.qris_content)}&choe=UTF-8&chld=L|2`;
+                    // --- PERBAIKAN: GUNAKAN QUICKCHART.IO ---
+                    // Ini jauh lebih stabil daripada Google Chart
+                    // ecLevel=L (Low) & margin=1 membuat QR lebih mudah discan
+                    const qrImageUrl = `https://quickchart.io/qr?text=${encodeURIComponent(result.qris_content)}&size=300&ecLevel=L&margin=1`;
                     
                     qrContainer.innerHTML = `
-                        <img src="${googleQrUrl}" style="width:100%; max-width:280px; border-radius:8px;" alt="QRIS Code">
+                        <img src="${qrImageUrl}" style="width:100%; max-width:280px; border-radius:8px; display:block; margin:0 auto;" alt="QRIS Code">
                         
-                        <div style="margin-top:10px; border-top:1px dashed #ccc; padding-top:5px;">
-                            <p style="font-size:10px; color:#64748b; margin-bottom:5px;">Jika gagal scan, copy kode ini:</p>
-                            <textarea readonly style="width:100%; height:50px; font-size:10px; background:#f1f5f9; border:none; border-radius:5px; color:#334155; padding:5px;">${result.qris_content}</textarea>
+                        <div style="margin-top:15px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;">
+                            <p style="font-size:10px; color:#94a3b8; margin-bottom:5px;">Isi String QRIS (Cek apakah Sandbox/Live):</p>
+                            <textarea readonly style="width:100%; height:40px; font-size:9px; background:#0f172a; border:1px solid #334155; color:#cbd5e1; padding:5px; border-radius:4px;">${result.qris_content}</textarea>
                         </div>
                     `;
 
@@ -422,6 +422,7 @@
                 btn.innerHTML = 'BAYAR SEKARANG';
             }
         };
+
 
 
         // Helper Toast
