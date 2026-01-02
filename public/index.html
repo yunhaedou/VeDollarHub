@@ -98,7 +98,7 @@
         @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes zoomEffect { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
         
-        /* --- TAMBAHAN: CSS UNTUK POPUP QRIS --- */
+        /* --- CSS UNTUK POPUP QRIS --- */
         .modal { 
             display: none; 
             position: fixed; 
@@ -127,6 +127,7 @@
             border-radius: 10px;
             display: inline-block;
             margin: 20px 0;
+            min-height: 250px; /* Biar tidak gepeng saat loading */
         }
         .close-modal { 
             position: absolute; top: 15px; right: 20px; 
@@ -178,7 +179,7 @@
         </div>
 
         <div data-aos="fade-up">
-            <button class="btn-glow" onclick="toggleModal()">
+            <button class="btn-glow" onclick="toggleModal('benefitModal')">
                 <i class="fas fa-star"></i> Cek Keuntungan Premium
             </button>
         </div>
@@ -233,7 +234,7 @@
 
     <div class="modal" id="benefitModal">
         <div class="modal-content">
-            <span class="close-modal" onclick="toggleModal()">&times;</span>
+            <span class="close-modal" onclick="closeModal('benefitModal')">&times;</span>
             <h3 style="color: var(--primary); margin-bottom: 15px;">Keuntungan Premium</h3>
             <div style="text-align: left; color: #cbd5e1; font-size: 14px; line-height: 2;">
                 <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Auto Create Server (Langsung Aktif)</p>
@@ -247,7 +248,7 @@
 
     <div class="modal" id="qrisModal">
         <div class="modal-content">
-            <span class="close-modal" onclick="document.getElementById('qrisModal').style.display='none'">&times;</span>
+            <span class="close-modal" onclick="closeModal('qrisModal')">&times;</span>
             <h3 style="color: #6366f1; margin-bottom: 5px;">Scan QRIS</h3>
             <p style="font-size: 12px; color: #94a3b8;">Gunakan DANA/Gopay/OVO/BCA</p>
             
@@ -263,8 +264,6 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -294,13 +293,11 @@
             container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>';
 
             for (const cat of categories) {
-                // Wrapper per kategori
                 const catDiv = document.createElement('div');
                 catDiv.id = cat;
                 catDiv.className = `price-category ${cat === 'botwa' ? 'active' : ''}`;
                 
                 try {
-                    // Ambil data firebase
                     const q = query(collection(db, "products"), where("category", "==", cat));
                     const querySnapshot = await getDocs(q);
 
@@ -309,8 +306,6 @@
                     } else {
                         querySnapshot.forEach((doc) => {
                             const data = doc.data();
-                            
-                            // Siapkan tampilan RAM/CPU jika ada
                             let spekInfo = "";
                             if(data.ram) {
                                 spekInfo = `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">
@@ -329,7 +324,6 @@
                                 </div>
                                 <div class="price-tag">Rp ${data.price}</div>
                             `;
-                            // Event Listener Klik Produk
                             card.onclick = function() {
                                 document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
                                 card.classList.add('selected');
@@ -337,7 +331,6 @@
                                     name: data.name,
                                     price: data.price,
                                     category: data.category,
-                                    // DATA SPEK
                                     ram: data.ram,
                                     cpu: data.cpu,
                                     disk: data.disk
@@ -356,8 +349,7 @@
 
         fetchAndRenderProducts();
 
-        // --- 3. LOGIC CHECKOUT (CONNECT KE VERCEL) ---
-        // SAYA SUDAH PERBAIKI KURUNG KURAWAL DISINI
+        // --- 3. LOGIC CHECKOUT (FIXED: USING API QR SERVER) ---
         window.processCheckout = async function() {
             const btn = document.querySelector('.btn-checkout');
             const username = document.getElementById('inpUsername').value;
@@ -387,7 +379,7 @@
                         password: password,
                         whatsapp: wa,
                         product: window.selectedProductData.name,
-                        price: window.selectedProductData.price.replace(/\D/g,''), // Hapus 'Rp' ambil angkanya saja
+                        price: window.selectedProductData.price.replace(/\D/g,''),
                         category: window.selectedProductData.category,
                         ram: window.selectedProductData.ram,
                         cpu: window.selectedProductData.cpu,
@@ -397,36 +389,22 @@
 
                 const result = await response.json();
 
-                        if (result.success && result.qris_content) {
-            showToast("Order Dibuat! Silakan Scan.", "success");
-            
-            // --- PERBAIKAN: GUNAKAN API IMAGE AGAR QR TIDAK BERUBAH ---
-            // Kita tidak pakai library 'new QRCode' lagi karena sering error.
-            // Kita pakai link gambar langsung yang meng-convert string jadi QR 100% akurat.
-            
-            const qrContainer = document.getElementById('qrCodePlace');
-            
-            // URL API QR (Aman & Akurat)
-            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(result.qris_content)}`;
-            
-            // Masukkan gambar ke dalam HTML
-            qrContainer.innerHTML = `<img src="${qrImageUrl}" style="width:100%; max-width:250px; border-radius:8px;" alt="QRIS Code">`;
+                if (result.success && result.qris_content) {
+                    showToast("Order Dibuat! Silakan Scan.", "success");
+                    
+                    // --- PERBAIKAN: GUNAKAN API IMAGE AGAR QR TIDAK BERUBAH ---
+                    const qrContainer = document.getElementById('qrCodePlace');
+                    
+                    // Kita gunakan encodeURIComponent agar karakter spesial di string QR tidak merusak URL
+                    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(result.qris_content)}`;
+                    
+                    // Masukkan gambar ke dalam HTML
+                    qrContainer.innerHTML = `<img src="${qrImageUrl}" style="width:100%; max-width:250px; border-radius:8px;" alt="QRIS Code">`;
 
-            // Update Harga & Tampilkan Modal
-            document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
-            document.getElementById('qrisModal').style.display = "flex";
-            
-            btn.innerHTML = 'BAYAR SEKARANG';
-            btn.disabled = false;
-        };
-
-
-
-                    // 3. Update Harga & Tampilkan Modal
+                    // Update Harga & Tampilkan Modal
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
                     document.getElementById('qrisModal').style.display = "flex";
                     
-                    // Reset Tombol
                     btn.innerHTML = 'BAYAR SEKARANG';
                     btn.disabled = false;
                 } else {
@@ -441,8 +419,7 @@
                 btn.disabled = false;
                 btn.innerHTML = 'BAYAR SEKARANG';
             }
-        }; // <-- INI YANG TADI HILANG (Penutup Fungsi)
-
+        };
 
         // Helper Toast
         function showToast(msg, type) {
@@ -451,18 +428,22 @@
             }).showToast();
         }
 
-        // --- 4. UI ANIMATIONS ---
+        // --- 4. UI ANIMATIONS & HELPERS ---
         AOS.init({ duration: 800, once: true });
 
         window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
 
-        window.toggleModal = () => {
-            const modal = document.getElementById('benefitModal');
-            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+        // Helper Modal Universal
+        window.toggleModal = (id) => {
+            // Jika id tidak dikirim, default ke benefitModal (untuk backward compatibility tombol lama)
+            const targetId = typeof id === 'string' ? id : 'benefitModal';
+            const modal = document.getElementById(targetId);
+            if(modal) modal.style.display = 'flex';
         }
-        window.onclick = function(event) {
-            const modal = document.getElementById('benefitModal');
-            if (event.target == modal) modal.style.display = "none";
+        
+        window.closeModal = (id) => {
+            const modal = document.getElementById(id);
+            if(modal) modal.style.display = 'none';
         }
 
         window.switchCategory = (catId) => {
