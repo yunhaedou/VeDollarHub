@@ -21,43 +21,35 @@ export default async function handler(req, res) {
             createdAt: new Date().toISOString()
         });
 
-        // 2. REQUEST KE PAKASIR (Domain Sudah Diperbaiki)
-        // Environment Variable 'PAYKASIR_API_KEY' biarkan saja namanya, tapi pastikan isinya API Key dari Pakasir.com
+        // 2. REQUEST KE PAKASIR (Sesuai Screenshot Dokumentasi)
+        // URL Endpoint: https://app.pakasir.com/api/transactioncreate/qris
         
-        // PENTING: Cek link docs Anda (pakasir.com/p/docs) untuk Endpoint URL pastinya.
-        // Biasanya formatnya seperti di bawah ini. Jika error 404, berarti path '/v1/transaction' harus diganti sesuai docs.
+        // PENTING: Anda harus menambahkan 'PAKASIR_PROJECT_ID' di Environment Variable Vercel
+        // Isinya adalah nama project Anda di Pakasir (contoh di docs: "depodomain")
         
-        const response = await axios.post('https://api.pakasir.com/v1/transaction', {
-            api_key: process.env.PAYKASIR_API_KEY, 
+        const response = await axios.post('https://app.pakasir.com/api/transactioncreate/qris', {
+            project: process.env.PAKASIR_PROJECT_ID, // WAJIB: Nama project Anda
             order_id: orderId,
-            amount: parseInt(price), 
-            type: "qris",            
-            valid_time: 300,
-            description: `Pembelian ${product}`
+            amount: parseInt(price),
+            api_key: process.env.PAYKASIR_API_KEY // API Key dari dashboard
         }, {
             headers: { 'Content-Type': 'application/json' }
         });
 
         const resultData = response.data;
 
-        // Cek Response Sukses/Gagal
-        if (!resultData.success && resultData.code !== 200) {
-            throw new Error(resultData.message || "Gagal request ke Pakasir");
+        // Cek Response: Pakasir biasanya mengembalikan object "payment" jika sukses
+        // Lihat screenshot response: { "payment": { "payment_number": "000201...", ... } }
+        
+        if (!resultData.payment) {
+            console.error("Pakasir Response:", resultData);
+            throw new Error("Gagal mengambil data dari Pakasir. Cek Project ID & API Key.");
         }
 
-        // Ambil QR String dari response Pakasir
-        // Sesuaikan key 'qris_content' dengan apa yang tertulis di Docs Pakasir jika nanti masih kosong
-        const qrString = resultData.data ? resultData.data.qris_content : resultData.qris_content;
+        const qrString = resultData.payment.payment_number; // Ini QR String-nya (berdasarkan contoh di docs)
 
         if (!qrString) {
-            // Fallback: Jika Pakasir tidak kasih string QR, mungkin dia kasih URL Image
-            const qrImage = resultData.data ? resultData.data.qr_image : resultData.qr_image;
-            if(qrImage) {
-                 // Jika dapatnya URL Gambar, kita kirim itu saja tapi frontend harus disesuaikan sedikit.
-                 // Tapi semoga dapat qris_content string.
-                 throw new Error("API Pakasir mereturn URL Gambar, bukan String QRIS. Cek Docs.");
-            }
-            throw new Error("Pakasir tidak mengirimkan QR String.");
+            throw new Error("Pakasir tidak mengirimkan QR String (payment_number kosong).");
         }
 
         // 3. Kirim Balik ke Frontend
@@ -70,9 +62,8 @@ export default async function handler(req, res) {
     } catch (error) {
         console.error("Payment Error:", error.response ? error.response.data : error.message);
         
-        // Pesan Error yang ramah di user
         return res.status(500).json({ 
-            error: "Gagal memproses pembayaran. Pastikan API Key Pakasir Benar.",
+            error: "Gagal memproses pembayaran.",
             details: error.message 
         });
     }
