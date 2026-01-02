@@ -350,6 +350,7 @@
         fetchAndRenderProducts();
 
         // --- 3. LOGIC CHECKOUT (FIXED: USING API QR SERVER) ---
+        // FUNGSI CHECKOUT (VERSI GOOGLE API + DEBUG MODE)
         window.processCheckout = async function() {
             const btn = document.querySelector('.btn-checkout');
             const username = document.getElementById('inpUsername').value;
@@ -357,16 +358,10 @@
             const email = document.getElementById('inpEmail').value;
             const password = document.getElementById('inpPass').value;
 
-            if(!username || !wa || !email || !password) {
-                showToast("Mohon lengkapi semua data akun!", "error");
-                return;
-            }
-            if(!window.selectedProductData) {
-                showToast("Silakan pilih paket terlebih dahulu!", "error");
-                return;
-            }
+            if(!username || !wa || !email || !password) return showToast("Lengkapi semua data!", "error");
+            if(!window.selectedProductData) return showToast("Pilih paket dulu!", "error");
 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses Order...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
 
             try {
@@ -392,21 +387,28 @@
                 if (result.success && result.qris_content) {
                     showToast("Order Dibuat! Silakan Scan.", "success");
                     
-                    // --- PERBAIKAN: GUNAKAN API IMAGE AGAR QR TIDAK BERUBAH ---
                     const qrContainer = document.getElementById('qrCodePlace');
                     
-                    // Kita gunakan encodeURIComponent agar karakter spesial di string QR tidak merusak URL
-                    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(result.qris_content)}`;
+                    // --- PERBAIKAN: GUNAKAN GOOGLE CHART API (LEBIH STABIL) ---
+                    // chld=L|2 artinya: Low Error Correction (Titik lebih besar/renggang) | Margin 2
+                    // Ini membuat QR Code lebih mudah dibaca oleh kamera HP
+                    const googleQrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(result.qris_content)}&choe=UTF-8&chld=L|2`;
                     
-                    // Masukkan gambar ke dalam HTML
-                    qrContainer.innerHTML = `<img src="${qrImageUrl}" style="width:100%; max-width:250px; border-radius:8px;" alt="QRIS Code">`;
+                    qrContainer.innerHTML = `
+                        <img src="${googleQrUrl}" style="width:100%; max-width:280px; border-radius:8px;" alt="QRIS Code">
+                        
+                        <div style="margin-top:10px; border-top:1px dashed #ccc; padding-top:5px;">
+                            <p style="font-size:10px; color:#64748b; margin-bottom:5px;">Jika gagal scan, copy kode ini:</p>
+                            <textarea readonly style="width:100%; height:50px; font-size:10px; background:#f1f5f9; border:none; border-radius:5px; color:#334155; padding:5px;">${result.qris_content}</textarea>
+                        </div>
+                    `;
 
-                    // Update Harga & Tampilkan Modal
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
                     document.getElementById('qrisModal').style.display = "flex";
                     
                     btn.innerHTML = 'BAYAR SEKARANG';
                     btn.disabled = false;
+
                 } else {
                     showToast("Gagal: " + (result.error || "Gagal mengambil data QRIS"), "error");
                     btn.disabled = false;
@@ -420,6 +422,7 @@
                 btn.innerHTML = 'BAYAR SEKARANG';
             }
         };
+
 
         // Helper Toast
         function showToast(msg, type) {
