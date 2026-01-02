@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from 'axios'; // <--- FIX: Huruf 'i' kecil
 import { PTERO_CONFIG } from '../config.js';
 
 const api = axios.create({
@@ -10,30 +10,27 @@ const api = axios.create({
     }
 });
 
-// 1. Ambil Detail Egg (Untuk Startup Command & Docker Image)
 async function getEggDetails(nestId, eggId) {
     try {
         const res = await api.get(`/api/application/nests/${nestId}/eggs/${eggId}`);
         return res.data.attributes;
     } catch (error) {
-        console.error("Gagal fetch Egg:", error.response?.data || error.message);
-        throw new Error("Gagal mengambil data Egg dari Panel");
+        throw new Error("Gagal fetch Egg: " + error.message);
     }
 }
 
-// 2. Cek User atau Buat Baru
 export async function ensurePteroUser(userData) {
-    // Cek apakah user sudah ada (berdasarkan email)
+    // Cek user berdasarkan email
     const search = await api.get(`/api/application/users?filter[email]=${userData.email}`);
     
     if (search.data.data.length > 0) {
-        return search.data.data[0].attributes.id; // Return ID user lama
+        return search.data.data[0].attributes.id;
     }
 
-    // Jika tidak ada, buat baru
+    // Jika tidak ada, buat user baru
     const newUser = await api.post('/api/application/users', {
         email: userData.email,
-        username: userData.username.replace(/\s/g, '').toLowerCase() + Math.floor(Math.random()*1000),
+        username: userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + Math.floor(Math.random()*100),
         first_name: userData.username,
         last_name: "(Customer)",
         password: userData.password
@@ -42,47 +39,44 @@ export async function ensurePteroUser(userData) {
     return newUser.data.attributes.id;
 }
 
-// 3. Create Server Otomatis
-export async function createPteroServer(userId, productType, ramSize) {
+// FUNGSI UPDATE: MENERIMA OBJECT RESOURCES
+export async function createPteroServer(userId, productType, resources) {
     const config = PTERO_CONFIG.games[productType];
     if (!config) throw new Error("Tipe game tidak dikenali");
 
-    // STEP PENTING: Fetch Default Egg Config
     const eggData = await getEggDetails(config.nestId, config.eggId);
 
-    // Build Environment Variables (Ambil default dari Egg)
-    let envVars = {};
-    // eggData.relationships.variables.data (Logic ini tergantung respon API egg, 
-    // biasanya kita ambil default dari panel jika tidak diset manual)
-    
-    // Construct Payload
     const payload = {
         name: `${productType.toUpperCase()} - User ${userId}`,
         user: userId,
         egg: config.eggId,
-        docker_image: eggData.docker_image, // <--- AMBIL DARI HASIL FETCH
-        startup: eggData.startup,           // <--- AMBIL DARI HASIL FETCH
+        docker_image: eggData.docker_image,
+        startup: eggData.startup,
         environment: {
-            // Kita isi environment wajib standar. 
-            // Sisanya akan pakai default value dari Panel karena Pterodactyl pintar.
             "BUNGEE_VERSION": "latest",
             "SERVER_VERSION": "latest",
-            "MINECRAFT_VERSION": "latest"
+            "MINECRAFT_VERSION": "latest",
+            "PMMP_VERSION": "latest",
+            "NUKKIT_VERSION": "latest"
         },
         limits: {
-            memory: parseInt(ramSize), // Dari produk yg dibeli
+            // GUNAKAN SPEK DARI DATABASE
+            memory: parseInt(resources.ram),
             swap: 0,
-            disk: config.disk,
+            disk: parseInt(resources.disk),
             io: 500,
-            cpu: config.cpu
+            cpu: parseInt(resources.cpu)
         },
         feature_limits: {
             databases: 1,
             backups: 0,
             allocations: 1
         },
-        allocation: {
-            default: config.locationId 
+        // FIX: Gunakan 'deploy' untuk auto-assign port/node
+        deploy: {
+            locations: [PTERO_CONFIG.locationId], // Menggunakan ID Lokasi dari config
+            dedicated_ip: false,
+            port_range: []
         }
     };
 
