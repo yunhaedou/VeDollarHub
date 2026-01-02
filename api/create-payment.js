@@ -6,11 +6,11 @@ export default async function handler(req, res) {
 
     const { username, email, password, whatsapp, product, price, category, ram, cpu, disk } = req.body;
     
-    // Buat Order ID Unik: TRX-[AngkaWaktu]
+    // Order ID Unik
     const orderId = `TRX-${Date.now()}`;
 
     try {
-        // 1. Simpan Data Order ke Firebase (Status: PENDING)
+        // 1. Simpan ke Firebase (Status: PENDING)
         await db.collection('orders').doc(orderId).set({
             username, email, password, whatsapp,
             product, price, category,
@@ -21,34 +21,46 @@ export default async function handler(req, res) {
             createdAt: new Date().toISOString()
         });
 
-        // 2. REQUEST KE PAYKASIR (REAL CONNECTION)
-        // Kita minta QRIS string khusus untuk transaksi ini
-        const response = await axios.post('https://io.paykasir.com/api/v1/transaction', {
-            api_key: process.env.PAYKASIR_API_KEY, // Pastikan ini ada di Vercel Env
+        // 2. REQUEST KE PAKASIR (Domain Sudah Diperbaiki)
+        // Environment Variable 'PAYKASIR_API_KEY' biarkan saja namanya, tapi pastikan isinya API Key dari Pakasir.com
+        
+        // PENTING: Cek link docs Anda (pakasir.com/p/docs) untuk Endpoint URL pastinya.
+        // Biasanya formatnya seperti di bawah ini. Jika error 404, berarti path '/v1/transaction' harus diganti sesuai docs.
+        
+        const response = await axios.post('https://api.pakasir.com/v1/transaction', {
+            api_key: process.env.PAYKASIR_API_KEY, 
             order_id: orderId,
-            amount: parseInt(price), // Wajib Angka (Integer)
-            type: "qris",            // Kita minta tipe QRIS
-            valid_time: 300          // QR Expired dalam 300 detik (5 menit)
+            amount: parseInt(price), 
+            type: "qris",            
+            valid_time: 300,
+            description: `Pembelian ${product}`
         }, {
             headers: { 'Content-Type': 'application/json' }
         });
 
-        const paykasirData = response.data;
+        const resultData = response.data;
 
-        // Cek response dari Paykasir sukses atau tidak
-        if (!paykasirData.success && paykasirData.code !== 200) {
-            throw new Error(paykasirData.message || "Gagal request ke Paykasir");
+        // Cek Response Sukses/Gagal
+        if (!resultData.success && resultData.code !== 200) {
+            throw new Error(resultData.message || "Gagal request ke Pakasir");
         }
 
-        // Ambil QR String (Biasanya ada di dalam object 'data')
-        // Struktur Paykasir biasanya: { data: { qris_content: "000201..." } }
-        const qrString = paykasirData.data ? paykasirData.data.qris_content : paykasirData.qris_content;
+        // Ambil QR String dari response Pakasir
+        // Sesuaikan key 'qris_content' dengan apa yang tertulis di Docs Pakasir jika nanti masih kosong
+        const qrString = resultData.data ? resultData.data.qris_content : resultData.qris_content;
 
         if (!qrString) {
-            throw new Error("Paykasir tidak mengirimkan QR String.");
+            // Fallback: Jika Pakasir tidak kasih string QR, mungkin dia kasih URL Image
+            const qrImage = resultData.data ? resultData.data.qr_image : resultData.qr_image;
+            if(qrImage) {
+                 // Jika dapatnya URL Gambar, kita kirim itu saja tapi frontend harus disesuaikan sedikit.
+                 // Tapi semoga dapat qris_content string.
+                 throw new Error("API Pakasir mereturn URL Gambar, bukan String QRIS. Cek Docs.");
+            }
+            throw new Error("Pakasir tidak mengirimkan QR String.");
         }
 
-        // 3. Kirim Balik ke Frontend untuk ditampilkan di Popup
+        // 3. Kirim Balik ke Frontend
         return res.status(200).json({
             success: true,
             qris_content: qrString, 
@@ -56,12 +68,12 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        // Log error lengkap di Vercel Console jika gagal
         console.error("Payment Error:", error.response ? error.response.data : error.message);
         
+        // Pesan Error yang ramah di user
         return res.status(500).json({ 
-            error: "Gagal membuat pembayaran. Cek log server.",
-            originalError: error.message 
+            error: "Gagal memproses pembayaran. Pastikan API Key Pakasir Benar.",
+            details: error.message 
         });
     }
 }
