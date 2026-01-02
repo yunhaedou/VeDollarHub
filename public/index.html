@@ -397,23 +397,29 @@
 
                 const result = await response.json();
 
-                if (result.success && result.qris_content) {
-                    showToast("Order Dibuat! Silakan Scan.", "success");
-                    
-// GANTI BAGIAN new QRCode(...) DENGAN INI:
+                        if (result.success && result.qris_content) {
+            showToast("Order Dibuat! Silakan Scan.", "success");
+            
+            // --- PERBAIKAN: GUNAKAN API IMAGE AGAR QR TIDAK BERUBAH ---
+            // Kita tidak pakai library 'new QRCode' lagi karena sering error.
+            // Kita pakai link gambar langsung yang meng-convert string jadi QR 100% akurat.
+            
+            const qrContainer = document.getElementById('qrCodePlace');
+            
+            // URL API QR (Aman & Akurat)
+            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(result.qris_content)}`;
+            
+            // Masukkan gambar ke dalam HTML
+            qrContainer.innerHTML = `<img src="${qrImageUrl}" style="width:100%; max-width:250px; border-radius:8px;" alt="QRIS Code">`;
 
-// 1. Bersihkan QR lama
-document.getElementById('qrCodePlace').innerHTML = ""; 
+            // Update Harga & Tampilkan Modal
+            document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
+            document.getElementById('qrisModal').style.display = "flex";
+            
+            btn.innerHTML = 'BAYAR SEKARANG';
+            btn.disabled = false;
+        } 
 
-// 2. Generate QR Baru (Versi Renggang/Mudah Scan)
-new QRCode(document.getElementById("qrCodePlace"), {
-    text: result.qris_content,
-    width: 256,              // Ukuran diperbesar sedikit
-    height: 256,
-    colorDark : "#000000",
-    colorLight : "#ffffff",
-    correctLevel : QRCode.CorrectLevel.L  // <--- INI KUNCINYA (Level L = Low = Titik lebih renggang/jelas)
-});
 
 
                     // 3. Update Harga & Tampilkan Modal
