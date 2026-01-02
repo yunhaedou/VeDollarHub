@@ -9,25 +9,25 @@ export const PTERO_CONFIG = {
     games: {
         "mc": { 
             nestId: 1, // ID Nest Minecraft
-            eggId: 5,  // ID Egg Minecraft Paper/Vanilla
+            eggId: 3,  // ID Egg Minecraft Paper/Vanilla
             cpu: 100,  // Default CPU %
             disk: 5000 // Default Disk MB (5GB)
         },
         "samp": { 
-            nestId: 2, 
-            eggId: 10,
+            nestId: 6, 
+            eggId: 16,
             cpu: 80,
             disk: 2000 
         },
         "botwa": { 
-            nestId: 3, 
+            nestId: 5, 
             eggId: 15,
             cpu: 50,
             disk: 1000 
         },
         "bottg": { 
-            nestId: 3, 
-            eggId: 16,
+            nestId: 5, 
+            eggId: 15,
             cpu: 50,
             disk: 1000 
         }
