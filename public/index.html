@@ -298,9 +298,7 @@
                     container.appendChild(catDiv);
                 } catch (error) {
                     console.error("Error fetching products:", error);
-                    // Biar ketahuan errornya apa
-container.innerHTML += `<p style="color:red; text-align:center; font-size:10px;">Error: ${error.message}</p>`;
-
+                    container.innerHTML += `<p style="color:red; text-align:center; font-size:12px;">Gagal memuat data. Cek koneksi.</p>`;
                 }
             }
         }
