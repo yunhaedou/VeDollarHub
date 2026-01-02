@@ -400,15 +400,21 @@
                 if (result.success && result.qris_content) {
                     showToast("Order Dibuat! Silakan Scan.", "success");
                     
-                    // 1. Bersihkan QR lama jika ada
-                    document.getElementById('qrCodePlace').innerHTML = "";
-                    
-                    // 2. Generate QR Baru
-                    new QRCode(document.getElementById("qrCodePlace"), {
-                        text: result.qris_content, // String QR dari Backend
-                        width: 200,
-                        height: 200
-                    });
+// GANTI BAGIAN new QRCode(...) DENGAN INI:
+
+// 1. Bersihkan QR lama
+document.getElementById('qrCodePlace').innerHTML = ""; 
+
+// 2. Generate QR Baru (Versi Renggang/Mudah Scan)
+new QRCode(document.getElementById("qrCodePlace"), {
+    text: result.qris_content,
+    width: 256,              // Ukuran diperbesar sedikit
+    height: 256,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.L  // <--- INI KUNCINYA (Level L = Low = Titik lebih renggang/jelas)
+});
+
 
                     // 3. Update Harga & Tampilkan Modal
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
