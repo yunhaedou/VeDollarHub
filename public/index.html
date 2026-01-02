@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeDollar Hub</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <style>
+        /* --- VARIABLES & RESET --- */
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
+        body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+
+        /* --- BACKGROUND PARTICLES --- */
+        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
+
+        /* --- CONTAINER --- */
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
+
+        /* --- HEADER --- */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; margin-bottom: 20px; animation: slideDown 1s ease; }
+        .logo-area img { height: 45px; width: auto; }
+        .menu-btn { font-size: 24px; cursor: pointer; transition: 0.3s; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px; border-left: var(--glass-border); display: flex; flex-direction: column; }
+        .sidebar.active { right: 0; }
+        .sidebar-links a { display: flex; align-items: center; color: var(--text-main); text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 10px; transition: 0.3s; background: rgba(255,255,255,0.03); }
+        .sidebar-links a:hover { background: var(--accent-gradient); transform: translateX(-5px); }
+        .sidebar-links i { margin-right: 15px; width: 20px; text-align: center; }
+
+        /* --- BANNER (9:16) --- */
+        .banner-container { width: 100%; aspect-ratio: 9/16; max-height: 500px; border-radius: 20px; overflow: hidden; position: relative; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: var(--glass-border); }
+        .banner-slide { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1s ease-in-out; transform: scale(1.05); animation: zoomEffect 20s infinite alternate; }
+        .banner-slide.active { opacity: 1; }
+        .banner-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px 20px 20px; background: linear-gradient(to top, #0f172a 10%, transparent 100%); }
+
+        /* --- CATEGORIES --- */
+        .category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; scrollbar-width: none; }
+        .category-scroll::-webkit-scrollbar { display: none; }
+        .cat-btn { background: var(--glass-bg); border: var(--glass-border); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .cat-btn.active, .cat-btn:hover { background: var(--accent-gradient); color: #fff; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); transform: translateY(-2px); }
+
+        /* --- FORMS & CARDS --- */
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: var(--glass-border); border-radius: 16px; padding: 25px; margin-bottom: 25px; transition: 0.3s; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; display: block; }
+        .input-field { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 14px; border-radius: 12px; color: #fff; outline: none; transition: 0.3s; }
+        .input-field:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
+
+        /* --- PRICING LIST --- */
+        .price-category { display: none; animation: fadeIn 0.5s; }
+        .price-category.active { display: block; }
+        .price-card { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid transparent; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .price-card:hover, .price-card.selected { border-color: var(--secondary); background: rgba(168, 85, 247, 0.1); }
+        .price-card.selected::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; right: 10px; top: 10px; color: var(--secondary); opacity: 0.5; }
+        .price-info h4 { font-size: 15px; margin-bottom: 2px; color: #fff; }
+        .price-info p { font-size: 11px; color: var(--text-muted); }
+        .price-tag { font-weight: bold; color: var(--secondary); font-size: 14px; }
+
+        /* --- BUTTONS --- */
+        .btn-glow { width: 100%; background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-bottom: 20px; transition: 0.4s; }
+        .btn-glow:hover { background: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+        
+        .btn-checkout { width: 100%; padding: 16px; background: var(--accent-gradient); border: none; border-radius: 15px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn-checkout:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-checkout:active { transform: scale(0.98); }
+
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--secondary); animation: popUp 0.4s; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+
+        /* --- FOOTER --- */
+        .footer { text-align: center; margin-top: 50px; padding-bottom: 20px; font-size: 12px; color: #64748b; }
+
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes zoomEffect { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <h3>Menu</h3>
+            <i class="fas fa-times menu-btn" onclick="toggleSidebar()"></i>
+        </div>
+        <div class="sidebar-links">
+            <a href="#"><i class="fab fa-whatsapp"></i> Hubungi Admin</a>
+            <a href="#"><i class="fas fa-history"></i> Cek Status Pesanan</a>
+            <a href="admin.html"><i class="fas fa-user-shield"></i> Login Admin</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h2 style="color: #fff; font-weight: 700; letter-spacing: 1px;">VeDollar<span style="color:var(--primary)">Hub</span></h2>
+            </div>
+            <i class="fas fa-bars menu-btn" onclick="toggleSidebar()"></i>
+        </header>
+
+        <div class="banner-container" data-aos="zoom-in">
+            <img src="https://via.placeholder.com/1080x1920/1e293b/ffffff?text=Minecraft+Hosting" class="banner-slide active">
+            <img src="https://via.placeholder.com/1080x1920/3b0764/ffffff?text=Bot+WhatsApp" class="banner-slide">
+            <div class="banner-overlay">
+                <h3>Hosting Otomatis</h3>
+                <p>Server langsung aktif setelah pembayaran sukses!</p>
+            </div>
+        </div>
+
+        <div class="category-scroll" data-aos="fade-right">
+            <button class="cat-btn active" onclick="switchCategory('botwa')"><i class="fab fa-whatsapp"></i> Bot WA</button>
+            <button class="cat-btn" onclick="switchCategory('bottg')"><i class="fab fa-telegram"></i> Bot Telegram</button>
+            <button class="cat-btn" onclick="switchCategory('mc')"><i class="fas fa-cube"></i> Minecraft</button>
+            <button class="cat-btn" onclick="switchCategory('samp')"><i class="fas fa-gamepad"></i> GTA SAMP</button>
+        </div>
+
+        <div data-aos="fade-up">
+            <button class="btn-glow" onclick="toggleModal()">
+                <i class="fas fa-star"></i> Cek Spesifikasi & Fitur
+            </button>
+        </div>
+
+        <div class="glass-card" data-aos="fade-up" data-aos-delay="100">
+            <h3 style="margin-bottom: 20px; border-left: 4px solid var(--secondary); padding-left: 10px;">1. Data Akun</h3>
+            <div class="form-group">
+                <label>Username (Untuk Panel)</label>
+                <input type="text" id="inpUsername" class="input-field" placeholder="Tanpa spasi, contoh: udin123">
+            </div>
+            <div class="form-group">
+                <label>Nomor WhatsApp</label>
+                <input type="number" id="inpWa" class="input-field" placeholder="08xx-xxxx-xxxx">
+            </div>
+            <div class="form-group">
+                <label>Email Aktif</label>
+                <input type="email" id="inpEmail" class="input-field" placeholder="email@contoh.com">
+            </div>
+            <div class="form-group">
+                <label>Password Panel</label>
+                <input type="password" id="inpPass" class="input-field" placeholder="Minimal 8 karakter">
+            </div>
+        </div>
+
+        <div class="glass-card" id="pricelist-container" data-aos="fade-up" data-aos-delay="200">
+            <h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>
+            <div style="text-align: center; padding: 20px;">
+                <i class="fas fa-circle-notch fa-spin" style="color: var(--primary);"></i> Memuat Produk...
+            </div>
+        </div>
+
+        <div class="glass-card" data-aos="fade-up" data-aos-delay="300">
+            <h3 style="margin-bottom: 15px;">3. Pembayaran</h3>
+            <div class="form-group">
+                <select class="input-field" id="paymentMethod" disabled>
+                    <option>QRIS Otomatis</option>
+                </select>
+            </div>
+            
+            <button class="btn-checkout" onclick="processCheckout()">
+                <i class="fas fa-shopping-cart"></i> BAYAR SEKARANG
+            </button>
+            <p style="text-align: center; margin-top: 10px; font-size: 11px; color: var(--text-muted);">
+                Dengan membeli, Anda menyetujui Syarat & Ketentuan.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 VeDollar Hub.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="benefitModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="toggleModal()">&times;</span>
+            <h3 style="color: var(--primary); margin-bottom: 15px;">Keuntungan Premium</h3>
+            <div style="text-align: left; color: #cbd5e1; font-size: 14px; line-height: 2;">
+                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Auto Create Server (Langsung Aktif)</p>
+                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Panel Pterodactyl Premium</p>
+                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Anti DDoS Protection</p>
+                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Uptime 99.9% Guarantee</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- 1. KONFIGURASI FIREBASE ---
+ // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34",
+  authDomain: "vedollar-hub.firebaseapp.com",
+  projectId: "vedollar-hub",
+  storageBucket: "vedollar-hub.firebasestorage.app",
+  messagingSenderId: "1091182084872",
+  appId: "1:1091182084872:web:d38ba494182e8cebcba2bd",
+  measurementId: "G-Y7JXCTLN9Q"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- 2. LOGIC RENDER PRODUK ---
+        window.selectedProductData = null;
+
+        async function fetchAndRenderProducts() {
+            const container = document.getElementById('pricelist-container');
+            const categories = ['botwa', 'bottg', 'mc', 'samp'];
+            
+            // Clear loading spinner
+            container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>';
+
+            for (const cat of categories) {
+                // Wrapper per kategori
+                const catDiv = document.createElement('div');
+                catDiv.id = cat;
+                catDiv.className = `price-category ${cat === 'botwa' ? 'active' : ''}`;
+                
+                try {
+                    // Ambil data firebase
+                    const q = query(collection(db, "products"), where("category", "==", cat));
+                    const querySnapshot = await getDocs(q);
+
+                    if (querySnapshot.empty) {
+                        catDiv.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px; font-size:12px;">Produk belum tersedia.</p>`;
+                    } else {
+                        querySnapshot.forEach((doc) => {
+                            const data = doc.data();
+                            // Gunakan template literal untuk HTML card
+                            const card = document.createElement('div');
+                            card.className = 'price-card';
+                            card.innerHTML = `
+                                <div class="price-info">
+                                    <h4>${data.name}</h4>
+                                    <p>${data.description}</p>
+                                </div>
+                                <div class="price-tag">Rp ${data.price}</div>
+                            `;
+                            // Event Listener Klik Produk
+                            card.onclick = function() {
+                                // Hapus selected class dari semua card
+                                document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
+                                // Tambah ke card ini
+                                card.classList.add('selected');
+                                // Simpan data ke variable global
+                                window.selectedProductData = {
+                                    name: data.name,
+                                    price: data.price,
+                                    category: data.category
+                                };
+                            };
+                            catDiv.appendChild(card);
+                        });
+                    }
+                    container.appendChild(catDiv);
+                } catch (error) {
+                    console.error("Error fetching products:", error);
+                    container.innerHTML += `<p style="color:red; text-align:center;">Gagal memuat data. Cek koneksi internet.</p>`;
+                }
+            }
+        }
+
+        // Jalankan Fetch saat load
+        fetchAndRenderProducts();
+
+        // --- 3. LOGIC CHECKOUT (CONNECT KE VERCEL) ---
+        window.processCheckout = async function() {
+            const btn = document.querySelector('.btn-checkout');
+            const username = document.getElementById('inpUsername').value;
+            const wa = document.getElementById('inpWa').value;
+            const email = document.getElementById('inpEmail').value;
+            const password = document.getElementById('inpPass').value;
+
+            // Validasi Input
+            if(!username || !wa || !email || !password) {
+                showToast("Mohon lengkapi semua data akun!", "error");
+                return;
+            }
+            if(!window.selectedProductData) {
+                showToast("Silakan pilih paket terlebih dahulu!", "error");
+                return;
+            }
+
+            // UI Loading
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses Order...';
+            btn.disabled = true;
+
+            try {
+                // Request ke API Backend Vercel
+                const response = await fetch('/api/create-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password,
+                        whatsapp: wa,
+                        product: window.selectedProductData.name,
+                        // Pastikan harga hanya angka (hapus Rp dan titik)
+                        price: window.selectedProductData.price.replace(/\D/g,''),
+                        category: window.selectedProductData.category
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast("Order dibuat! Mengalihkan ke pembayaran...", "success");
+                    // Redirect ke Paykasir
+                    setTimeout(() => {
+                        window.location.href = result.payment_url;
+                    }, 1500);
+                } else {
+                    showToast("Gagal: " + (result.error || "Terjadi kesalahan"), "error");
+                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> BAYAR SEKARANG';
+                    btn.disabled = false;
+                }
+
+            } catch (error) {
+                console.error(error);
+                showToast("Terjadi kesalahan jaringan/server", "error");
+                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> BAYAR SEKARANG';
+                btn.disabled = false;
+            }
+        }
+
+        // Helper Toast
+        function showToast(msg, type) {
+            Toastify({
+                text: msg,
+                duration: 3000,
+                gravity: "top", 
+                position: "center", 
+                backgroundColor: type === "success" ? "#22c55e" : "#ef4444",
+            }).showToast();
+        }
+
+        // --- 4. UI ANIMATIONS & EVENTS ---
+        
+        // Init AOS
+        AOS.init({ duration: 800, once: true });
+
+        // Sidebar Functions
+        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
+
+        // Modal Functions
+        window.toggleModal = () => {
+            const modal = document.getElementById('benefitModal');
+            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        // Category Switcher
+        window.switchCategory = (catId) => {
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active'); // Highlight button
+            
+            document.querySelectorAll('.price-category').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById(catId);
+            if(target) target.classList.add('active'); // Show Content
+        }
+
+        // Banner Slideshow
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.banner-slide');
+        function showSlides() {
+            if(slides.length > 0) {
+                slides.forEach(slide => slide.classList.remove('active'));
+                slideIndex++;
+                if (slideIndex > slides.length) { slideIndex = 1 }
+                slides[slideIndex - 1].classList.add('active');
+                setTimeout(showSlides, 4000);
+            }
+        }
+        showSlides();
+
+        // Particles JS
+        particlesJS("particles-js", {
+            "particles": { "number": { "value": 50 }, "color": { "value": "#6366f1" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#a855f7", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 2 } },
+            "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": true, "mode": "push" } } }, "retina_detect": true
+        });
+    </script>
+</body>
+</html>
