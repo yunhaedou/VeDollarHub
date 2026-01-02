@@ -6,9 +6,7 @@
     <title>VeDollar Hub</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
@@ -47,7 +45,7 @@
         .sidebar-links a:hover { background: var(--accent-gradient); transform: translateX(-5px); }
         .sidebar-links i { margin-right: 15px; width: 20px; text-align: center; }
 
-        /* --- BANNER (9:16) --- */
+        /* --- BANNER --- */
         .banner-container { width: 100%; aspect-ratio: 9/16; max-height: 500px; border-radius: 20px; overflow: hidden; position: relative; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: var(--glass-border); }
         .banner-slide { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1s ease-in-out; transform: scale(1.05); animation: zoomEffect 20s infinite alternate; }
         .banner-slide.active { opacity: 1; }
@@ -85,9 +83,43 @@
         .btn-checkout:active { transform: scale(0.98); }
 
         /* --- MODAL --- */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--secondary); animation: popUp 0.4s; position: relative; }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--secondary); animation: popUp 0.4s; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); transition: 0.3s; }
+        .close-modal:hover { color: #fff; }
+
+        /* CSS KHUSUS DETAIL SERVER POPUP */
+        .server-details-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+        }
+        .copy-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .copy-label { font-size: 10px; color: #94a3b8; display: block; margin-bottom: 2px; }
+        .copy-val { font-size: 13px; color: #fff; font-family: monospace; }
+        .btn-copy {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+        .btn-copy:hover { background: var(--primary); color: white; }
+        .timer-warning { font-size: 11px; color: #f59e0b; margin-top: 5px; font-style: italic; }
 
         /* --- FOOTER --- */
         .footer { text-align: center; margin-top: 50px; padding: 20px; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -97,42 +129,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes zoomEffect { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
-        
-        /* --- CSS UNTUK POPUP QRIS --- */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); 
-            z-index: 9999; 
-            justify-content: center; 
-            align-items: center; 
-            backdrop-filter: blur(5px); 
-        }
-        .modal-content { 
-            background: #1e293b; 
-            padding: 30px; 
-            border-radius: 20px; 
-            width: 90%; 
-            max-width: 350px; 
-            text-align: center; 
-            border: 1px solid #a855f7; 
-            position: relative; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        }
-        .qr-frame {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            display: inline-block;
-            margin: 20px 0;
-            min-height: 250px; /* Biar tidak gepeng saat loading */
-        }
-        .close-modal { 
-            position: absolute; top: 15px; right: 20px; 
-            font-size: 24px; cursor: pointer; color: #94a3b8; 
-        }
     </style>
 </head>
 <body>
@@ -163,7 +159,6 @@
         <div class="banner-container" data-aos="zoom-in">
             <img src="https://via.placeholder.com/1080x1920/1e293b/ffffff?text=Minecraft+Hosting+Murah" class="banner-slide active">
             <img src="https://via.placeholder.com/1080x1920/3b0764/ffffff?text=Bot+WhatsApp+24/7" class="banner-slide">
-            <img src="https://via.placeholder.com/1080x1920/1e1b4b/ffffff?text=GTA+SAMP+Server" class="banner-slide">
             
             <div class="banner-overlay">
                 <h3>Hosting Otomatis</h3>
@@ -241,7 +236,6 @@
                 <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Panel Pterodactyl Premium</p>
                 <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Anti DDoS Protection</p>
                 <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Uptime 99.9% Guarantee</p>
-                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Full Akses File Manager</p>
             </div>
         </div>
     </div>
@@ -257,18 +251,56 @@
             <p style="font-size: 14px; color: white;">Total: <b id="qrisAmount" style="color:#22c55e">Rp 0</b></p>
             <p style="font-size: 11px; color: #64748b; margin-top: 5px;">Setelah bayar, tunggu admin memproses.</p>
             
-            <button onclick="window.location.reload()" style="margin-top:15px; padding:10px; width:100%; background:#6366f1; color:white; border:none; border-radius:10px; cursor:pointer;">Saya Sudah Bayar</button>
+            <button onclick="window.location.reload()" style="margin-top:15px; padding:10px; width:100%; background:var(--primary); color:white; border:none; border-radius:10px; cursor:pointer;">Saya Sudah Bayar</button>
+        </div>
+    </div>
+
+    <div class="modal" id="serverDetailModal" data-backdrop="static">
+        <div class="modal-content">
+            <span class="close-modal" id="btnCloseServerModal" style="display: none;" onclick="window.location.reload()">&times;</span>
+            
+            <h3 style="color: var(--success); margin-bottom: 5px;"><i class="fas fa-check-circle"></i> Pembayaran Sukses!</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Server Anda telah aktif. Simpan data ini!</p>
+
+            <div class="server-details-box">
+                <div class="copy-group">
+                    <div>
+                        <span class="copy-label">Panel URL</span>
+                        <span class="copy-val" id="resUrl">panel.domainkamu.com</span>
+                    </div>
+                    <button class="btn-copy" onclick="copyToClip('resUrl', this)">Salin</button>
+                </div>
+
+                <div class="copy-group">
+                    <div>
+                        <span class="copy-label">Username</span>
+                        <span class="copy-val" id="resUser">...</span>
+                    </div>
+                    <button class="btn-copy" onclick="copyToClip('resUser', this)">Salin</button>
+                </div>
+
+                <div class="copy-group">
+                    <div>
+                        <span class="copy-label">Password</span>
+                        <span class="copy-val" id="resPass">...</span>
+                    </div>
+                    <button class="btn-copy" onclick="copyToClip('resPass', this)">Salin</button>
+                </div>
+            </div>
+
+            <p class="timer-warning" id="timerText">Harap backup data! Tombol tutup muncul dalam 10s...</p>
         </div>
     </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- 1. KONFIGURASI FIREBASE ---
+        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34",
             authDomain: "vedollar-hub.firebaseapp.com",
@@ -282,14 +314,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- 2. LOGIC RENDER PRODUK ---
+        // LOGIC RENDER PRODUK
         window.selectedProductData = null;
 
         async function fetchAndRenderProducts() {
             const container = document.getElementById('pricelist-container');
             const categories = ['botwa', 'bottg', 'mc', 'samp'];
-            
-            // Reset Container
             container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>';
 
             for (const cat of categories) {
@@ -302,10 +332,10 @@
                     const querySnapshot = await getDocs(q);
 
                     if (querySnapshot.empty) {
-                        catDiv.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px; font-size:12px;">Produk belum tersedia di kategori ini.</p>`;
+                        catDiv.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px; font-size:12px;">Produk belum tersedia.</p>`;
                     } else {
-                        querySnapshot.forEach((doc) => {
-                            const data = doc.data();
+                        querySnapshot.forEach((docSnap) => {
+                            const data = docSnap.data();
                             let spekInfo = "";
                             if(data.ram) {
                                 spekInfo = `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">
@@ -324,6 +354,7 @@
                                 </div>
                                 <div class="price-tag">Rp ${data.price}</div>
                             `;
+                            
                             card.onclick = function() {
                                 document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
                                 card.classList.add('selected');
@@ -341,16 +372,14 @@
                     }
                     container.appendChild(catDiv);
                 } catch (error) {
-                    console.error("Error fetching products:", error);
-                    container.innerHTML += `<p style="color:red; text-align:center; font-size:12px;">Gagal memuat data. Cek koneksi.</p>`;
+                    console.error("Error products:", error);
+                    container.innerHTML += `<p style="color:red; text-align:center; font-size:12px;">Gagal memuat data.</p>`;
                 }
             }
         }
-
         fetchAndRenderProducts();
 
-        // --- 3. LOGIC CHECKOUT (FIXED: USING API QR SERVER) ---
-        // FUNGSI CHECKOUT (VERSI QUICKCHART - STABIL & CEPAT)
+        // LOGIC CHECKOUT
         window.processCheckout = async function() {
             const btn = document.querySelector('.btn-checkout');
             const username = document.getElementById('inpUsername').value;
@@ -358,8 +387,8 @@
             const email = document.getElementById('inpEmail').value;
             const password = document.getElementById('inpPass').value;
 
-            if(!username || !wa || !email || !password) return showToast("Lengkapi semua data!", "error");
-            if(!window.selectedProductData) return showToast("Pilih paket dulu!", "error");
+            if(!username || !wa || !email || !password) return showToast("Lengkapi semua data akun!", "error");
+            if(!window.selectedProductData) return showToast("Pilih paket terlebih dahulu!", "error");
 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
@@ -387,20 +416,13 @@
                 if (result.success && result.qris_content) {
                     showToast("Order Dibuat! Silakan Scan.", "success");
                     
+                    // Generate QR
                     const qrContainer = document.getElementById('qrCodePlace');
-                    
-                    // --- PERBAIKAN: GUNAKAN QUICKCHART.IO ---
-                    // Ini jauh lebih stabil daripada Google Chart
-                    // ecLevel=L (Low) & margin=1 membuat QR lebih mudah discan
                     const qrImageUrl = `https://quickchart.io/qr?text=${encodeURIComponent(result.qris_content)}&size=300&ecLevel=L&margin=1`;
                     
                     qrContainer.innerHTML = `
                         <img src="${qrImageUrl}" style="width:100%; max-width:280px; border-radius:8px; display:block; margin:0 auto;" alt="QRIS Code">
-                        
-                        <div style="margin-top:15px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;">
-                            <p style="font-size:10px; color:#94a3b8; margin-bottom:5px;">Isi String QRIS (Cek apakah Sandbox/Live):</p>
-                            <textarea readonly style="width:100%; height:40px; font-size:9px; background:#0f172a; border:1px solid #334155; color:#cbd5e1; padding:5px; border-radius:4px;">${result.qris_content}</textarea>
-                        </div>
+                        <p style="text-align:center; font-size:10px; color:#94a3b8; margin-top:10px;">Menunggu pembayaran masuk...</p>
                     `;
 
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
@@ -408,6 +430,50 @@
                     
                     btn.innerHTML = 'BAYAR SEKARANG';
                     btn.disabled = false;
+
+                    // --- AUTO DETECT PAID STATUS & SHOW SERVER DETAILS ---
+                    const orderDocRef = doc(db, "orders", result.order_id);
+                    const unsubscribe = onSnapshot(orderDocRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            if (data.status === 'PAID') {
+                                // 1. Tutup QR Modal
+                                document.getElementById('qrisModal').style.display = "none";
+                                
+                                // 2. Buka Server Detail Modal
+                                const serverModal = document.getElementById('serverDetailModal');
+                                serverModal.style.display = 'flex';
+                                
+                                // 3. Isi Data
+                                // (Ganti 'panel.yourdomain.com' nanti dengan domain Pterodactyl kamu)
+                                document.getElementById('resUrl').innerText = "https://panel.nosh.id"; 
+                                document.getElementById('resUser').innerText = data.username;
+                                document.getElementById('resPass').innerText = data.password;
+
+                                // 4. Jalankan Timer 10 Detik
+                                let timeLeft = 10;
+                                const timerText = document.getElementById('timerText');
+                                const closeBtn = document.getElementById('btnCloseServerModal');
+                                
+                                showToast("Server Aktif! Backup data Anda.", "success");
+
+                                const countdown = setInterval(() => {
+                                    timeLeft--;
+                                    timerText.innerText = `Harap backup data! Tombol tutup muncul dalam ${timeLeft}s...`;
+                                    
+                                    if(timeLeft <= 0) {
+                                        clearInterval(countdown);
+                                        timerText.innerText = "Data aman? Silakan tutup popup.";
+                                        timerText.style.color = "#4ade80"; // Hijau
+                                        closeBtn.style.display = "block"; // Munculkan tombol X
+                                    }
+                                }, 1000);
+                                
+                                // 5. Stop listening
+                                unsubscribe();
+                            }
+                        }
+                    });
 
                 } else {
                     showToast("Gagal: " + (result.error || "Gagal mengambil data QRIS"), "error");
@@ -423,37 +489,43 @@
             }
         };
 
-
-
-        // Helper Toast
+        // UI HELPERS
         function showToast(msg, type) {
             Toastify({
                 text: msg, duration: 3000, gravity: "top", position: "center", backgroundColor: type === "success" ? "#22c55e" : "#ef4444",
             }).showToast();
         }
 
-        // --- 4. UI ANIMATIONS & HELPERS ---
-        AOS.init({ duration: 800, once: true });
-
-        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
-
-        // Helper Modal Universal
-        window.toggleModal = (id) => {
-            // Jika id tidak dikirim, default ke benefitModal (untuk backward compatibility tombol lama)
-            const targetId = typeof id === 'string' ? id : 'benefitModal';
-            const modal = document.getElementById(targetId);
-            if(modal) modal.style.display = 'flex';
+        // FUNGSI COPY TO CLIPBOARD
+        window.copyToClip = (elementId, btn) => {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = "Disalin!";
+                btn.style.background = "#22c55e";
+                btn.style.color = "white";
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = "transparent";
+                    btn.style.color = "var(--primary)";
+                }, 2000);
+            });
         }
+
+        AOS.init({ duration: 800, once: true });
+        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
         
+        window.toggleModal = (id) => {
+            const target = id ? id : 'benefitModal';
+            document.getElementById(target).style.display = 'flex';
+        }
         window.closeModal = (id) => {
-            const modal = document.getElementById(id);
-            if(modal) modal.style.display = 'none';
+            document.getElementById(id).style.display = 'none';
         }
 
         window.switchCategory = (catId) => {
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
             document.querySelectorAll('.price-category').forEach(el => el.classList.remove('active'));
             const target = document.getElementById(catId);
             if(target) target.classList.add('active');
@@ -472,10 +544,7 @@
         }
         showSlides();
 
-        particlesJS("particles-js", {
-            "particles": { "number": { "value": 50 }, "color": { "value": "#6366f1" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#a855f7", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 2 } },
-            "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": true, "mode": "push" } } }, "retina_detect": true
-        });
+        particlesJS("particles-js", { "particles": { "number": { "value": 50 }, "color": { "value": "#6366f1" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#a855f7", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 2 } } });
     </script>
 </body>
 </html>
