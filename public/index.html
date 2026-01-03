@@ -21,7 +21,7 @@
         .logo-area h2 { color: #fff; font-weight: 700; font-size: 22px; }
         .menu-btn { font-size: 24px; cursor: pointer; color: white; z-index: 1001; }
 
-        /* RIGHT SIDEBAR */
+        /* RIGHT SIDEBAR (IG & TG) */
         .right-sidebar { position: fixed; top: 0; right: -300px; width: 260px; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); z-index: 1000; transition: 0.4s; padding: 30px 20px; border-left: var(--glass-border); box-shadow: -5px 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
         .right-sidebar.active { right: 0; }
         .owner-menu a { display: flex; align-items: center; color: #fff; text-decoration: none; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; transition: 0.3s; font-size: 13px; }
@@ -63,9 +63,15 @@
     <div class="right-sidebar" id="rightSidebar">
         <h3 style="color:#fff; margin-bottom:20px; border-bottom:1px solid #334155; padding-bottom:10px;">Contact Owner</h3>
         <div class="owner-menu">
-            <a href="#" id="linkWa" target="_blank"><i class="fab fa-whatsapp" style="color:#22c55e"></i> WhatsApp</a>
-            <a href="#" id="linkTg1" target="_blank"><i class="fab fa-telegram" style="color:#3b82f6"></i> Telegram 1</a>
-            <a href="#" id="linkTg2" target="_blank"><i class="fab fa-telegram" style="color:#a855f7"></i> Telegram 2</a>
+            <a href="#" id="linkWa" target="_blank">
+                <i class="fab fa-whatsapp" style="color:#22c55e"></i> WhatsApp
+            </a>
+            <a href="#" id="linkIg" target="_blank">
+                <i class="fab fa-instagram" style="color:#E1306C"></i> Instagram
+            </a>
+            <a href="#" id="linkTg" target="_blank">
+                <i class="fab fa-telegram" style="color:#0088cc"></i> Telegram
+            </a>
         </div>
         <div style="margin-top:auto; font-size:11px; color:#64748b; text-align:center;">&copy; VeDollar Hub</div>
     </div>
@@ -191,15 +197,15 @@
                 const socSnap = await getDoc(doc(db, "settings", "socials"));
                 if(socSnap.exists()) {
                     const s = socSnap.data();
-                    // Set Href
+                    // Set Href (IG & TG)
                     document.getElementById('linkWa').href = s.wa || "https://wa.me/15812811162";
-                    document.getElementById('linkTg1').href = s.tg1 || "https://t.me/oo_amediketu";
-                    document.getElementById('linkTg2').href = s.tg2 || "https://t.me/hantu_cilik";
+                    document.getElementById('linkIg').href = s.ig || "https://instagram.com/oo_amediketu";
+                    document.getElementById('linkTg').href = s.tg || "https://t.me/hantu_cilik";
                 } else {
                     // Default Fallback
                     document.getElementById('linkWa').href = "https://wa.me/15812811162";
-                    document.getElementById('linkTg1').href = "https://t.me/oo_amediketu";
-                    document.getElementById('linkTg2').href = "https://t.me/hantu_cilik";
+                    document.getElementById('linkIg').href = "https://instagram.com/oo_amediketu";
+                    document.getElementById('linkTg').href = "https://t.me/hantu_cilik";
                 }
             } catch(e) {}
         }
@@ -217,6 +223,7 @@
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
+            // HIDE/SHOW FORM INPUT
             const formCard = document.getElementById('formCard');
             if (['botwa', 'bottg'].includes(catId)) formCard.style.display = 'block'; 
             else formCard.style.display = 'none'; 
@@ -283,6 +290,7 @@
             // --- INPUT DATA ---
             let username = "Guest", email = "guest@no-email.com", password = "manual-process", wa = "00000000000";
 
+            // Jika BOT: Ambil dari input
             if (['botwa', 'bottg'].includes(window.currentCategory)) {
                 username = document.getElementById('inpUsername').value;
                 email = document.getElementById('inpEmail').value;
@@ -332,7 +340,7 @@
                                 document.getElementById('hostingDetails').style.display = 'block';
                                 document.getElementById('appDetails').style.display = 'none';
                                 document.getElementById('resUrl').innerText = data.panel_url || "...";
-                                document.getElementById('resUser').innerText = data.username; 
+                                document.getElementById('resUser').innerText = data.username; // Ptero Username
                                 document.getElementById('resPass').innerText = data.password;
                             }
 
