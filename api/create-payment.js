@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 
     const { username, email, password, whatsapp, product, price, category, ram, cpu, disk } = req.body;
 
-    // 2. Validasi Data Masuk
+    // 2. Validasi Data
     if (!username || !email || !password || !whatsapp) {
         return res.status(400).json({ error: 'Data formulir tidak lengkap.' });
     }
@@ -14,57 +14,50 @@ export default async function handler(req, res) {
     try {
         const orderId = `ORDER-${new Date().getTime()}-${Math.floor(Math.random() * 1000)}`;
 
-        // 3. SIAPKAN DATA KE PAKASIR
-        // Kita gunakan JSON.stringify karena lebih stabil di Node.js daripada URLSearchParams
-        // Pastikan amount diubah menjadi integer (angka bulat)
-        const payload = {
-            api_key: process.env.PAKASIR_API_KEY,
-            project_id: process.env.PAKASIR_PROJECT_ID,
-            amount: parseInt(price), // Pastikan ini angka
-            order_id: orderId,
-            description: `Beli ${product}`,
-            payment_method: "qris",
-            customer_name: username,
-            customer_email: email,
-            customer_phone: whatsapp
-        };
+        // 3. SIAPKAN DATA (FORMAT FORM DATA)
+        // Pakasir biasanya mewajibkan format ini, bukan JSON.
+        const params = new URLSearchParams();
+        params.append('api_key', process.env.PAKASIR_API_KEY);
+        params.append('project_id', process.env.PAKASIR_PROJECT_ID);
+        params.append('amount', parseInt(price)); // Pastikan angka bulat
+        params.append('order_id', orderId);
+        params.append('description', `Beli ${product}`);
+        params.append('payment_method', 'qris');
+        params.append('customer_name', username);
+        params.append('customer_email', email);
+        params.append('customer_phone', whatsapp);
 
-        // 4. KIRIM KE PAKASIR (Pakai JSON)
+        // 4. KIRIM REQUEST (Tanpa Header Content-Type Manual)
+        // fetch akan otomatis mendeteksi URLSearchParams dan menambahkan header yang benar
         const pakasirReq = await fetch('https://pakasir.com/api/create-transaction', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
+            body: params
         });
 
-        // Cek jika URL salah atau server Pakasir down
+        // Cek Status HTTP
         if (!pakasirReq.ok) {
-            const text = await pakasirReq.text();
-            console.error("Pakasir HTTP Error:", text);
-            return res.status(500).json({ error: `Pakasir Error: ${pakasirReq.status} ${pakasirReq.statusText}` });
+            const errText = await pakasirReq.text();
+            console.error("Pakasir HTTP Error:", pakasirReq.status, errText);
+            return res.status(pakasirReq.status).json({ 
+                error: `Gagal koneksi ke Pakasir (${pakasirReq.status}). Cek URL/API Key.` 
+            });
         }
 
         const pakasirRes = await pakasirReq.json();
 
-        // 5. CEK APAKAH PAKASIR MENOLAK?
-        // Jika success false, kita ambil pesan error aslinya
-        if (!pakasirRes.success) {
+        // 5. CEK SUKSES/GAGAL DARI PAKASIR
+        if (!pakasirRes.success && !pakasirRes.data?.qr_string && !pakasirRes.qr_string) {
             console.error("Pakasir Menolak:", JSON.stringify(pakasirRes));
-            // Ambil pesan error spesifik dari Pakasir
-            const msg = pakasirRes.message || pakasirRes.error || "Gagal membuat QRIS (API Key/Project ID Salah?)";
+            // Tampilkan pesan error asli dari Pakasir
+            const msg = pakasirRes.message || pakasirRes.error || "Gagal membuat QRIS (API Key Salah?)";
             return res.status(400).json({ error: msg });
         }
 
-        // Ambil QR String (bisa ada di data.qr_string atau langsung di qr_string tergantung versi API)
         const qrString = pakasirRes.data ? pakasirRes.data.qr_string : pakasirRes.qr_string;
 
-        if (!qrString) {
-            return res.status(500).json({ error: "QR String tidak ditemukan dalam respon Pakasir." });
-        }
-
-        // 6. Simpan ke Firebase (Username ASLI dari input user)
+        // 6. Simpan ke Firebase
+        // Kita simpan Username ASLI inputan user (tanpa angka acak)
+        // Nanti Webhook yang akan mengupdate jika username berubah
         await db.collection('orders').doc(orderId).set({
             order_id: orderId,
             username, email, password, whatsapp,
