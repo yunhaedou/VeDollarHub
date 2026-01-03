@@ -3,173 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexHost Admin Panel</title>
+    <title>Admin Dashboard - VeDollar Hub</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --glass-bg: rgba(30, 41, 59, 0.8);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-            --primary: #6366f1;
-            --secondary: #a855f7;
-            --danger: #ef4444;
-            --success: #22c55e;
-            --text-main: #f8fafc;
-        }
-
+        :root { --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.7); --glass-border: 1px solid rgba(255, 255, 255, 0.1); --primary: #6366f1; --secondary: #a855f7; --text-main: #f8fafc; --text-muted: #94a3b8; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-        }
-
-        #login-section { margin-top: 10vh; width: 100%; max-width: 400px; text-align: center; }
-        #dashboard-section { display: none; width: 100%; max-width: 1000px; }
-
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: var(--glass-border);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-size: 12px; margin-bottom: 5px; color: #94a3b8; }
-        
-        .input-field, select {
-            width: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid #334155;
-            padding: 12px;
-            border-radius: 8px;
-            color: #fff;
-            outline: none;
-        }
-        
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; color: white; }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); width: 100%; }
-        .btn-danger { background: var(--danger); }
-        .btn-edit { background: #f59e0b; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
-        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
+        .glass-card { background: var(--glass-bg); border: var(--glass-border); border-radius: 16px; padding: 25px; margin-bottom: 25px; }
+        h3 { margin-bottom: 15px; color: var(--primary); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+        .input-field, select { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 10px; border-radius: 8px; color: #fff; outline: none; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-sync { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; width: 100%; }
+        .btn-save { background: var(--primary); color: white; width: 100%; }
+        .btn-del { background: #ef4444; color: white; padding: 5px 10px; font-size: 12px; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .product-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        .product-table th { text-align: left; color: var(--text-muted); padding: 10px; border-bottom: 1px solid #334155; }
+        .product-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .btn-back { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); display: inline-block; margin-bottom: 20px; text-decoration: none; padding: 5px 15px; border-radius: 50px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div id="login-section" class="glass-card">
-        <h2 style="color: var(--primary);">Admin Login</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label>Email Admin</label>
-                <input type="email" id="loginEmail" class="input-field" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="loginPass" class="input-field" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Masuk</button>
-        </form>
-    </div>
+    <div class="container">
+        <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali ke Toko</a>
 
-    <div id="dashboard-section">
-        <div class="dash-header">
-            <h2><i class="fas fa-cogs"></i> Panel Produk</h2>
-            <button onclick="logout()" class="btn btn-danger" style="width: auto;">Logout</button>
+        <div class="header">
+            <h2>Admin Panel</h2>
+            <div style="font-size: 12px; color: #94a3b8;">Kelola Produk & Hosting</div>
         </div>
 
-        <div class="glass-card">
-            <h3 id="formTitle">Tambah Produk Baru</h3>
-            <form id="productForm">
-                <input type="hidden" id="productId">
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label>Nama Produk</label>
-                        <input type="text" id="pName" class="input-field" placeholder="Contoh: Paket Sultan" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Harga (Rp)</label>
-                        <input type="number" id="pPrice" class="input-field" placeholder="Contoh: 15000" required>
-                    </div>
-                </div>
+        <div class="glass-card" style="border-left: 4px solid #22c55e;">
+            <h3><i class="fas fa-sync-alt"></i> Get Layanan GriezStore</h3>
+            <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 15px;">
+                Tarik otomatis data <b>Mobile Legends (Indo/Brazil)</b> dan <b>Weekly Diamond</b> dari GriezStore. Harga otomatis dimarkup Rp 1.500.
+            </p>
+            <button class="btn btn-sync" onclick="syncGriez()">
+                <i class="fas fa-cloud-download-alt"></i> AMBIL LAYANAN SEKARANG
+            </button>
+        </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <div class="form-group">
-                        <label>RAM (MB)</label>
-                        <input type="number" id="pRam" class="input-field" placeholder="1024" required>
-                    </div>
-                    <div class="form-group">
-                        <label>CPU (%)</label>
-                        <input type="number" id="pCpu" class="input-field" placeholder="100" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Disk (MB)</label>
-                        <input type="number" id="pDisk" class="input-field" placeholder="1000" required>
-                    </div>
-                </div>
+        <div class="glass-card" style="border-left: 4px solid var(--primary);">
+            <h3><i class="fas fa-server"></i> Tambah Hosting Manual (Bot Only)</h3>
+            <p style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">Khusus Bot WhatsApp / Telegram (Settingan Manual).</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group"><label>Nama Produk</label><input type="text" id="pName" class="input-field" placeholder="Contoh: Paket Bot Basic"></div>
+                <div class="form-group"><label>Harga (Rp)</label><input type="number" id="pPrice" class="input-field" placeholder="15000"></div>
+            </div>
 
-                <div class="form-group">
-                    <label>Kategori</label>
-                    <select id="pCategory" class="input-field">
-                        <option value="botwa">Bot WhatsApp</option>
-                        <option value="bottg">Bot Telegram</option>
-                        <option value="mc">Minecraft Server</option>
-                        <option value="samp">GTA SAMP Server</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>Kategori</label>
+                <select id="pCat" class="input-field">
+                    <option value="botwa">Bot WhatsApp</option>
+                    <option value="bottg">Bot Telegram</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label>Deskripsi Singkat</label>
-                    <input type="text" id="pDesc" class="input-field" placeholder="Contoh: 30 Hari, Auto Reply..." required>
-                </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div class="form-group"><label>RAM (MB)</label><input type="number" id="pRam" class="input-field" value="1024"></div>
+                <div class="form-group"><label>CPU (%)</label><input type="number" id="pCpu" class="input-field" value="100"></div>
+                <div class="form-group"><label>Disk (MB)</label><input type="number" id="pDisk" class="input-field" value="1000"></div>
+            </div>
 
-                <button type="submit" id="submitBtn" class="btn btn-primary">Simpan Produk</button>
-                <button type="button" id="cancelBtn" onclick="resetForm()" class="btn" style="background: #475569; margin-top: 10px; display: none;">Batal Edit</button>
-            </form>
+            <button class="btn btn-save" onclick="addHostingProduct()"><i class="fas fa-plus"></i> Simpan Produk Bot</button>
         </div>
 
         <div class="glass-card">
             <h3>Daftar Produk Aktif</h3>
             <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Kategori</th>
-                            <th>Nama</th>
-                            <th>Harga</th>
-                            <th>Spek (R/C/D)</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productTableBody"></tbody>
+                <table class="product-table">
+                    <thead><tr><th>Nama</th><th>Kategori</th><th>Harga</th><th>Aksi</th></tr></thead>
+                    <tbody id="productList"><tr><td colspan="4" style="text-align:center;">Memuat...</td></tr></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIG FIREBASE KAMU
         const firebaseConfig = {
             apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34",
             authDomain: "vedollar-hub.firebaseapp.com",
@@ -181,119 +105,64 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // AUTH Logic
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('dashboard-section').style.display = 'block';
-                loadProducts();
-            } else {
-                document.getElementById('login-section').style.display = 'block';
-                document.getElementById('dashboard-section').style.display = 'none';
-            }
-        });
+        // SYNC GRIEZ
+        window.syncGriez = async function() {
+            const btn = document.querySelector('.btn-sync');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Proses Ambil Data...';
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/sync-griez');
+                const data = await res.json();
+                if (data.success) showToast(data.message, "success");
+                else showToast(data.error || "Gagal Sync", "error");
+            } catch (error) { showToast("Error Server", "error"); } 
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
+        };
 
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value)
-                .then(() => showToast("Login Berhasil!", "success"))
-                .catch((error) => showToast("Gagal: " + error.message, "error"));
-        });
+        // ADD HOSTING MANUAL
+        window.addHostingProduct = async function() {
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const cat = document.getElementById('pCat').value;
+            const ram = document.getElementById('pRam').value;
+            const cpu = document.getElementById('pCpu').value;
+            const disk = document.getElementById('pDisk').value;
 
-        window.logout = () => signOut(auth);
-
-        // CRUD Logic
-        const productForm = document.getElementById('productForm');
-        let isEditing = false;
-
-        productForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('productId').value;
-            const data = {
-                name: document.getElementById('pName').value,
-                price: document.getElementById('pPrice').value,
-                category: document.getElementById('pCategory').value,
-                description: document.getElementById('pDesc').value,
-                // SIMPAN SPEK
-                ram: parseInt(document.getElementById('pRam').value) || 1024,
-                cpu: parseInt(document.getElementById('pCpu').value) || 100,
-                disk: parseInt(document.getElementById('pDisk').value) || 1000,
-                createdAt: new Date()
-            };
+            if(!name || !price) return showToast("Isi nama & harga!", "error");
 
             try {
-                if (isEditing && id) {
-                    await updateDoc(doc(db, "products", id), data);
-                    showToast("Produk diupdate!", "success");
-                } else {
-                    await addDoc(collection(db, "products"), data);
-                    showToast("Produk ditambahkan!", "success");
-                }
-                resetForm();
-            } catch (e) {
-                showToast("Error: " + e.message, "error");
-            }
+                await addDoc(collection(db, "products"), {
+                    name, price: parseInt(price), category: cat,
+                    description: `RAM ${ram}MB, CPU ${cpu}%`,
+                    ram, cpu, disk, provider: 'manual'
+                });
+                showToast("Produk Hosting Ditambah!", "success");
+                document.getElementById('pName').value = ""; document.getElementById('pPrice').value = "";
+            } catch (e) { showToast(e.message, "error"); }
+        };
+
+        // LIST PRODUK
+        const q = query(collection(db, "products"), orderBy("category"));
+        onSnapshot(q, (snapshot) => {
+            const tbody = document.getElementById('productList');
+            tbody.innerHTML = "";
+            if(snapshot.empty) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Kosong.</td></tr>`; return; }
+            snapshot.forEach((docSnap) => {
+                const p = docSnap.data();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><b>${p.name}</b><br><small style="color:#64748b">${p.service_code || 'Manual'}</small></td>
+                    <td><span style="background:#334155; padding:2px 6px; border-radius:4px; font-size:10px;">${p.category}</span></td>
+                    <td>Rp ${p.price}</td>
+                    <td><button class="btn btn-del" onclick="deleteProduct('${docSnap.id}')"><i class="fas fa-trash"></i></button></td>`;
+                tbody.appendChild(tr);
+            });
         });
 
-        function loadProducts() {
-            const q = query(collection(db, "products"), orderBy("category"));
-            onSnapshot(q, (snapshot) => {
-                const tbody = document.getElementById('productTableBody');
-                tbody.innerHTML = "";
-                snapshot.forEach((doc) => {
-                    const item = doc.data();
-                    const row = `
-                        <tr>
-                            <td><small style="background:#334155; padding:2px 5px; border-radius:4px;">${item.category}</small></td>
-                            <td>${item.name}</td>
-                            <td>Rp ${item.price}</td>
-                            <td style="font-size:12px; color:#cbd5e1;">${item.ram}MB / ${item.cpu}% / ${item.disk}MB</td>
-                            <td>
-                                <button onclick="editProduct('${doc.id}', '${item.name}', '${item.price}', '${item.category}', '${item.description}', ${item.ram}, ${item.cpu}, ${item.disk})" class="btn btn-edit"><i class="fas fa-edit"></i></button>
-                                <button onclick="deleteProduct('${doc.id}')" class="btn btn-danger"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>`;
-                    tbody.innerHTML += row;
-                });
-            });
-        }
-
-        window.editProduct = (id, name, price, category, desc, ram, cpu, disk) => {
-            document.getElementById('productId').value = id;
-            document.getElementById('pName').value = name;
-            document.getElementById('pPrice').value = price;
-            document.getElementById('pCategory').value = category;
-            document.getElementById('pDesc').value = desc;
-            document.getElementById('pRam').value = ram || 1024;
-            document.getElementById('pCpu').value = cpu || 100;
-            document.getElementById('pDisk').value = disk || 1000;
-            
-            document.getElementById('formTitle').innerText = "Edit Produk";
-            document.getElementById('submitBtn').innerText = "Update";
-            document.getElementById('cancelBtn').style.display = "inline-block";
-            isEditing = true;
-            window.scrollTo(0,0);
-        }
-
-        window.deleteProduct = async (id) => {
-            if(confirm("Hapus produk ini?")) await deleteDoc(doc(db, "products", id));
-        }
-
-        window.resetForm = () => {
-            productForm.reset();
-            document.getElementById('productId').value = "";
-            document.getElementById('formTitle').innerText = "Tambah Produk Baru";
-            document.getElementById('submitBtn').innerText = "Simpan";
-            document.getElementById('cancelBtn').style.display = "none";
-            isEditing = false;
-        }
-
-        function showToast(msg, type) {
-            Toastify({ text: msg, duration: 3000, backgroundColor: type === "success" ? "#22c55e" : "#ef4444" }).showToast();
-        }
+        window.deleteProduct = async (id) => { if(confirm("Hapus?")) try { await deleteDoc(doc(db, "products", id)); showToast("Dihapus.", "success"); } catch(e){} };
+        function showToast(msg, type) { Toastify({ text: msg, duration: 3000, gravity: "top", position: "center", backgroundColor: type === "success" ? "#22c55e" : "#ef4444" }).showToast(); }
     </script>
 </body>
 </html>
