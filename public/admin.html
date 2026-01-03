@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-
     <style>
         :root { --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.7); --glass-border: 1px solid rgba(255, 255, 255, 0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -22,6 +20,7 @@
         .btn-blue { background: #3b82f6; color: white; }
         .btn-purple { background: #a855f7; color: white; }
         .btn-orange { background: #f97316; color: white; }
+        .btn-red { background: #dc2626; color: white; }
         .btn-yellow { background: #f59e0b; color: white; } /* Tombol Update */
         .btn-gray { background: #64748b; color: white; } /* Tombol Batal */
         
@@ -34,18 +33,34 @@
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         th, td { text-align: left; padding: 10px; border-bottom: 1px solid #334155; }
-        h3 { margin-bottom: 15px; font-size: 18px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2>Admin Panel</h2>
-            <a href="index.html" style="color:#aaa; text-decoration:none; font-size:14px;"><i class="fas fa-arrow-left"></i> Kembali</a>
+            <a href="index.html" style="color:#aaa; text-decoration:none;"><i class="fas fa-arrow-left"></i> Kembali</a>
+        </div>
+
+        <div class="glass-card" style="border-left: 4px solid #dc2626;">
+            <h3 style="color:#f87171"><i class="fas fa-clock"></i> Cek Server Expired</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">Suspend server yang lewat 30 hari.</p>
+            <button class="btn btn-red" id="btnCron" onclick="runCronCheck()">Jalankan Cek Expired</button>
+        </div>
+
+        <div class="glass-card" style="border-left: 4px solid #fff;">
+            <h3><i class="fas fa-users"></i> Link Sosmed Owner (Sidebar)</h3>
+            <label style="font-size:12px; color:#aaa;">WhatsApp Link</label>
+            <input type="text" id="socWa" class="input-field" placeholder="https://wa.me/15812811162">
+            <label style="font-size:12px; color:#aaa;">Telegram 1 Link</label>
+            <input type="text" id="socTg1" class="input-field" placeholder="https://t.me/oo_amediketu">
+            <label style="font-size:12px; color:#aaa;">Telegram 2 Link</label>
+            <input type="text" id="socTg2" class="input-field" placeholder="https://t.me/hantu_cilik">
+            <button class="btn btn-blue" onclick="saveSocials()">Simpan Link Sosmed</button>
         </div>
 
         <div class="glass-card" style="border-left: 4px solid #f97316;">
-            <h3 style="color:#fb923c"><i class="fas fa-info-circle"></i> Benefit</h3>
+            <h3 style="color:#fb923c"><i class="fas fa-info-circle"></i> Atur Teks Benefit</h3>
             <textarea id="benBotWa" class="input-field" rows="2" placeholder="Benefit Bot WA..."></textarea>
             <textarea id="benBotTg" class="input-field" rows="2" placeholder="Benefit Bot TG..."></textarea>
             <textarea id="benVps" class="input-field" rows="2" placeholder="Benefit VPS..."></textarea>
@@ -56,15 +71,12 @@
         <div class="glass-card" id="cardApp" style="border-left: 4px solid #22c55e;">
             <span class="edit-badge">MODE EDIT</span>
             <h3 style="color:#4ade80"><i class="fas fa-cube"></i> App Premium (Stok)</h3>
-            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">
-                Gunakan tanda sama dengan <b>=</b> sebagai pembatas.<br>
-                Contoh: <code>akun1|pass = akun2|pass = akun3</code>
-            </p>
+            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">Format: <code>akun1|pass = akun2|pass</code> (Pemisah <b>=</b> )</p>
             
             <input type="hidden" id="editIdApp">
             <input type="text" id="appName" class="input-field" placeholder="Nama App">
             <input type="number" id="appPrice" class="input-field" placeholder="Harga">
-            <textarea id="appStock" class="input-field" rows="3" placeholder="email1@gmail.com|pass = email2@gmail.com|pass"></textarea>
+            <textarea id="appStock" class="input-field" rows="3" placeholder="Isi stok..."></textarea>
             
             <div id="btnGroupApp">
                 <button class="btn btn-green" onclick="addAppProduct()">Simpan App</button>
@@ -109,12 +121,7 @@
 
         <div class="glass-card">
             <h3>Daftar Produk</h3>
-            <div style="overflow-x:auto;">
-                <table id="prodTable">
-                    <thead><tr><th>Nama</th><th>Kategori</th><th>Harga</th><th>Info</th><th>Aksi</th></tr></thead>
-                    <tbody><tr><td colspan="5">Memuat...</td></tr></tbody>
-                </table>
-            </div>
+            <div style="overflow-x:auto;"><table id="prodTable"><thead><tr><th>Nama</th><th>Kategori</th><th>Harga</th><th>Info</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
 
@@ -123,48 +130,56 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, setDoc, doc, getDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const db = getFirestore(initializeApp({
-            apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34",
-            authDomain: "vedollar-hub.firebaseapp.com",
-            projectId: "vedollar-hub"
-        }));
+        const db = getFirestore(initializeApp({ apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34", authDomain: "vedollar-hub.firebaseapp.com", projectId: "vedollar-hub" }));
 
-        window.allProducts = {}; // Cache data untuk Edit
+        // GLOBAL CACHE UNTUK EDIT
+        window.allProducts = {};
 
-        // --- BENEFIT ---
-        async function loadBenefits() {
-            try { const s = await getDoc(doc(db, "settings", "benefits")); if(s.exists()){ const d=s.data(); document.getElementById('benBotWa').value=d.botwa||""; document.getElementById('benBotTg').value=d.bottg||""; document.getElementById('benVps').value=d.vps||""; document.getElementById('benApp').value=d.app||""; } } catch(e){}
+        // --- LOAD SETTINGS (BENEFIT & SOSMED) ---
+        async function loadSettings() {
+            try { 
+                const b = await getDoc(doc(db, "settings", "benefits")); 
+                if(b.exists()){ const d=b.data(); document.getElementById('benBotWa').value=d.botwa||""; document.getElementById('benBotTg').value=d.bottg||""; document.getElementById('benVps').value=d.vps||""; document.getElementById('benApp').value=d.app||""; }
+                
+                const s = await getDoc(doc(db, "settings", "socials"));
+                if(s.exists()){ const d=s.data(); document.getElementById('socWa').value=d.wa||""; document.getElementById('socTg1').value=d.tg1||""; document.getElementById('socTg2').value=d.tg2||""; }
+            } catch(e){}
         }
-        loadBenefits();
-        window.saveBenefits = async () => {
-            try { await setDoc(doc(db, "settings", "benefits"), { botwa: document.getElementById('benBotWa').value, bottg: document.getElementById('benBotTg').value, vps: document.getElementById('benVps').value, app: document.getElementById('benApp').value }); Toastify({text:"Disimpan", backgroundColor:"#f97316"}).showToast(); } catch(e){}
+        loadSettings();
+
+        // --- SAVE FUNCTIONS ---
+        window.saveSocials = async () => {
+            try { await setDoc(doc(db, "settings", "socials"), { wa: document.getElementById('socWa').value, tg1: document.getElementById('socTg1').value, tg2: document.getElementById('socTg2').value }); Toastify({text:"Sosmed Disimpan", backgroundColor:"#3b82f6"}).showToast(); } catch(e){}
         };
 
-        // --- 1. APP PREMIUM (PEMISAH =) ---
+        window.saveBenefits = async () => {
+            try { await setDoc(doc(db, "settings", "benefits"), { botwa: document.getElementById('benBotWa').value, bottg: document.getElementById('benBotTg').value, vps: document.getElementById('benVps').value, app: document.getElementById('benApp').value }); Toastify({text:"Benefit Disimpan", backgroundColor:"#f97316"}).showToast(); } catch(e){}
+        };
+
+        window.runCronCheck = async () => {
+            const btn = document.getElementById('btnCron');
+            btn.innerHTML = "Memeriksa..."; btn.disabled = true;
+            try {
+                const req = await fetch('/api/cron-check');
+                const res = await req.json();
+                Toastify({text: res.message, backgroundColor:"#dc2626"}).showToast();
+            } catch(e) { alert(e.message); }
+            finally { btn.innerHTML = "Jalankan Cek Expired"; btn.disabled = false; }
+        };
+
+        // --- 1. APP PREMIUM ---
         window.addAppProduct = async () => {
             const name=document.getElementById('appName').value, price=document.getElementById('appPrice').value, raw=document.getElementById('appStock').value;
             if(!name||!price||!raw) return alert("Lengkapi");
-            try { 
-                await addDoc(collection(db, "products"), { 
-                    name, price: parseInt(price), category: 'app', 
-                    stock: raw.split('=').map(s=>s.trim()).filter(s=>s!==""), // SPLIT PAKAI =
-                    description: "Auto Kirim" 
-                }); 
-                Toastify({text:"Sukses", backgroundColor:"#22c55e"}).showToast(); 
-                resetForm('app');
-            } catch(e){ alert(e.message); }
+            try { await addDoc(collection(db, "products"), { name, price: parseInt(price), category: 'app', stock: raw.split('=').map(s=>s.trim()).filter(s=>s!==""), description: "Auto Kirim" }); Toastify({text:"Sukses", backgroundColor:"#22c55e"}).showToast(); resetForm('app'); } catch(e){ alert(e.message); }
         };
 
         window.updateAppProduct = async () => {
             const id = document.getElementById('editIdApp').value;
             const name=document.getElementById('appName').value, price=document.getElementById('appPrice').value, raw=document.getElementById('appStock').value;
             try {
-                await updateDoc(doc(db, "products", id), {
-                    name, price: parseInt(price),
-                    stock: raw.split('=').map(s=>s.trim()).filter(s=>s!=="") // SPLIT PAKAI =
-                });
-                Toastify({text:"Update Sukses", backgroundColor:"#f59e0b"}).showToast();
-                resetForm('app');
+                await updateDoc(doc(db, "products", id), { name, price: parseInt(price), stock: raw.split('=').map(s=>s.trim()).filter(s=>s!=="") });
+                Toastify({text:"Update Sukses", backgroundColor:"#f59e0b"}).showToast(); resetForm('app');
             } catch(e) { alert(e.message); }
         };
 
@@ -179,13 +194,8 @@
             const id = document.getElementById('editIdHost').value;
             const name=document.getElementById('hostName').value, price=document.getElementById('hostPrice').value, cat=document.getElementById('hostCat').value;
             try {
-                await updateDoc(doc(db, "products", id), {
-                    name, price: parseInt(price), category: cat,
-                    description: `RAM ${document.getElementById('hostRam').value}MB`, 
-                    ram: parseInt(document.getElementById('hostRam').value), cpu: 100, disk: 1000
-                });
-                Toastify({text:"Update Sukses", backgroundColor:"#f59e0b"}).showToast();
-                resetForm('host');
+                await updateDoc(doc(db, "products", id), { name, price: parseInt(price), category: cat, description: `RAM ${document.getElementById('hostRam').value}MB`, ram: parseInt(document.getElementById('hostRam').value), cpu: 100, disk: 1000 });
+                Toastify({text:"Update Sukses", backgroundColor:"#f59e0b"}).showToast(); resetForm('host');
             } catch(e) { alert(e.message); }
         };
 
@@ -201,8 +211,7 @@
             const name=document.getElementById('vpsName').value, price=document.getElementById('vpsPrice').value, desc=document.getElementById('vpsDesc').value;
             try {
                 await updateDoc(doc(db, "products", id), { name, price: parseInt(price), description: desc });
-                Toastify({text:"Update Sukses", backgroundColor:"#f59e0b"}).showToast();
-                resetForm('vps');
+                Toastify({text:"Update Sukses", backgroundColor:"#f59e0b"}).showToast(); resetForm('vps');
             } catch(e) { alert(e.message); }
         };
 
@@ -215,9 +224,7 @@
                 document.getElementById('editIdApp').value = id;
                 document.getElementById('appName').value = p.name;
                 document.getElementById('appPrice').value = p.price;
-                // JOIN PAKAI =
                 document.getElementById('appStock').value = (p.stock || []).join(' = '); 
-                
                 toggleEditMode('app', true);
                 document.getElementById('cardApp').scrollIntoView({behavior: "smooth"});
             } 
@@ -227,7 +234,6 @@
                 document.getElementById('hostPrice').value = p.price;
                 document.getElementById('hostCat').value = p.category;
                 document.getElementById('hostRam').value = p.ram;
-                
                 toggleEditMode('host', true);
                 document.getElementById('cardHost').scrollIntoView({behavior: "smooth"});
             }
@@ -236,7 +242,6 @@
                 document.getElementById('vpsName').value = p.name;
                 document.getElementById('vpsPrice').value = p.price;
                 document.getElementById('vpsDesc').value = p.description;
-
                 toggleEditMode('vps', true);
                 document.getElementById('cardVps').scrollIntoView({behavior: "smooth"});
             }
@@ -266,13 +271,13 @@
             else { document.getElementById('vpsName').value=""; document.getElementById('vpsPrice').value=""; document.getElementById('vpsDesc').value=""; }
         }
 
-        // --- LOAD LIST ---
+        // --- LIST ---
         onSnapshot(query(collection(db, "products"), orderBy("category")), (snap) => {
             const tb = document.querySelector('#prodTable tbody'); tb.innerHTML = "";
             window.allProducts = {};
             snap.forEach(d => {
                 const p = d.data();
-                window.allProducts[d.id] = p; // Simpan ke cache
+                window.allProducts[d.id] = p; 
                 let info = "-";
                 if(p.category==='app') info = p.stock? `<b style="color:#4ade80">${p.stock.length} Stok</b>` : `<b style="color:red">HABIS</b>`;
                 else if(p.category==='vps') info = "Manual";
