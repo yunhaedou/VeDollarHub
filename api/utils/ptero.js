@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { PTERO_CONFIG } from '../config.js';
 
-// Setup Koneksi
 const api = axios.create({
     baseURL: PTERO_CONFIG.domain,
     headers: {
@@ -20,45 +19,42 @@ async function getEggDetails(nestId, eggId) {
     }
 }
 
-// [BARU] FUNGSI CEK KETERSEDIAAN (Dipakai sebelum Checkout)
+// FUNGSI CEK KETERSEDIAAN (Untuk Create Payment)
 export async function checkPteroAvailability(username, email) {
     try {
         // Cek Username
         const userCheck = await api.get(`/api/application/users?filter[username]=${username}`);
         if (userCheck.data.data.length > 0) {
-            return "Username sudah dipakai orang lain!";
+            return "Username sudah dipakai! Hapus user lama atau ganti nama.";
         }
-
         // Cek Email
         const emailCheck = await api.get(`/api/application/users?filter[email]=${email}`);
         if (emailCheck.data.data.length > 0) {
-            return "Email sudah terdaftar di panel!";
+            return "Email sudah terdaftar! Gunakan email lain.";
         }
-
-        return null; // Aman (Available)
+        return null; 
     } catch (error) {
-        console.error("Gagal Cek Ptero:", error.message);
-        return null; // Lanjut saja jika error koneksi, biar webhook yang handle
+        console.error("Skip Ptero Check (Error):", error.message);
+        return null; // Skip cek jika error koneksi, lanjut bayar
     }
 }
 
-// FUNGSI CREATE USER (Tanpa Random Number)
+// FUNGSI BUAT USER (PERSIS INPUT, NO RANDOM)
 export async function ensurePteroUser(userData) {
-    // Cek user by email (jika lolos cek di atas, berarti ini aman)
+    // 1. Cek dulu (Safety)
     const search = await api.get(`/api/application/users?filter[email]=${userData.email}`);
-    
     if (search.data.data.length > 0) {
         return search.data.data[0].attributes.id;
     }
 
-    // Buat User Baru (Username PERSIS sesuai input)
+    // 2. Bersihkan username dari spasi tapi JANGAN tambah angka
     const cleanUsername = userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 
     const newUser = await api.post('/api/application/users', {
         email: userData.email,
         username: cleanUsername, 
         first_name: userData.username,
-        last_name: "(BuyerVeDollar)",
+        last_name: "(Customer)",
         password: userData.password,
         root_admin: false,
         language: "en"
