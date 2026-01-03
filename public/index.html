@@ -17,29 +17,23 @@
         #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
         
-        /* HEADER */
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; margin-bottom: 20px; }
         .logo-area h2 { color: #fff; font-weight: 700; font-size: 22px; }
         
         .banner-container { width: 100%; aspect-ratio: 16/9; border-radius: 15px; overflow: hidden; position: relative; margin-bottom: 25px; border: var(--glass-border); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .banner-slide { width: 100%; height: 100%; object-fit: cover; }
         
-        /* CATEGORY */
         .category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none; }
         .cat-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .cat-btn.active, .cat-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
 
-        /* BUTTON BENEFIT */
         .btn-benefit { background: transparent; border: 1px dashed var(--secondary); color: var(--secondary); width: 100%; padding: 8px; border-radius: 8px; font-size: 12px; margin-bottom: 20px; cursor: pointer; transition: 0.3s; }
-        .btn-benefit:hover { background: rgba(168, 85, 247, 0.1); }
-
-        .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: var(--glass-border); border-radius: 16px; padding: 20px; margin-bottom: 20px; transition: 0.3s; }
         
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: var(--glass-border); border-radius: 16px; padding: 20px; margin-bottom: 20px; transition: 0.3s; }
         .form-group { margin-bottom: 15px; }
         .form-group label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; display: block; }
         .input-field { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 12px; border-radius: 10px; color: #fff; outline: none; transition: 0.3s; }
-        .input-field:focus { border-color: var(--primary); }
-
+        
         .product-card { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid transparent; cursor: pointer; transition: 0.2s; }
         .product-card:hover, .product-card.selected { border-color: var(--secondary); background: rgba(168, 85, 247, 0.1); }
         .product-info h4 { font-size: 14px; margin-bottom: 3px; color: #fff; }
@@ -55,8 +49,7 @@
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-content { background: #1e293b; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--secondary); animation: popUp 0.4s; }
-        .qr-frame { background: white; padding: 10px; border-radius: 10px; margin: 15px 0; }
-        .copy-box { background: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; color: #4ade80; border: 1px dashed #334155; word-break: break-all; margin-top: 10px; text-align: left; }
+        .copy-box { background: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #4ade80; border: 1px dashed #334155; word-break: break-all; margin-top: 10px; text-align: left; }
         
         @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
@@ -65,9 +58,7 @@
     <div id="particles-js"></div>
 
     <div class="container">
-        <header>
-            <div class="logo-area"><h2>VeDollar<span style="color:var(--primary)">Hub</span></h2></div>
-        </header>
+        <header><div class="logo-area"><h2>VeDollar<span style="color:var(--primary)">Hub</span></h2></div></header>
 
         <div class="banner-container" data-aos="zoom-in">
             <img src="https://via.placeholder.com/600x340/1e293b/ffffff?text=Hosting+Bot+&+App+Premium" class="banner-slide">
@@ -80,60 +71,39 @@
             <button class="cat-btn" onclick="switchCat('app')"><i class="fas fa-cube"></i> App Premium</button>
         </div>
 
-        <button class="btn-benefit" onclick="showBenefit()">
-            <i class="fas fa-info-circle"></i> Cek Keuntungan / Benefit Paket Ini
-        </button>
+        <button class="btn-benefit" onclick="showBenefit()"><i class="fas fa-info-circle"></i> Cek Benefit Paket Ini</button>
 
         <div class="glass-card" id="formCard" data-aos="fade-up">
             <h3 style="margin-bottom: 20px; border-left: 4px solid var(--secondary); padding-left: 10px;">1. Data Panel</h3>
-            <p style="font-size:11px; color:#aaa; margin-bottom:15px;">Data ini digunakan untuk login ke Panel Bot.</p>
-            
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="inpUsername" class="input-field" placeholder="Tanpa spasi (contoh: udin123)">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="inpEmail" class="input-field" placeholder="email@contoh.com">
-            </div>
-            <div class="form-group">
-                <label>Password Panel</label>
-                <input type="password" id="inpPass" class="input-field" placeholder="Buat password aman">
-            </div>
+            <div class="form-group"><label>Username</label><input type="text" id="inpUsername" class="input-field" placeholder="Tanpa spasi (contoh: udin123)"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="inpEmail" class="input-field" placeholder="email@contoh.com"></div>
+            <div class="form-group"><label>Password Panel</label><input type="password" id="inpPass" class="input-field" placeholder="Buat password aman"></div>
         </div>
 
         <div class="glass-card" id="pricelist-container" data-aos="fade-up" data-aos-delay="100">
             <h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>
-            <div id="productList" style="text-align: center; padding: 20px; font-size: 13px; color: #aaa;">
-                <i class="fas fa-circle-notch fa-spin"></i> Memuat Produk...
-            </div>
+            <div id="productList" style="text-align: center; padding: 20px; font-size: 13px; color: #aaa;"><i class="fas fa-circle-notch fa-spin"></i> Memuat Produk...</div>
         </div>
 
-        <button class="btn-checkout" onclick="processCheckout()" data-aos="fade-up" data-aos-delay="200">
-            <i class="fas fa-shopping-cart"></i> BAYAR SEKARANG
-        </button>
-        
-        <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #64748b;">
-            &copy; 2026 VeDollar Hub. All Rights Reserved.
-        </div>
+        <button class="btn-checkout" onclick="processCheckout()" data-aos="fade-up" data-aos-delay="200"><i class="fas fa-shopping-cart"></i> BAYAR SEKARANG</button>
+        <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #64748b;">&copy; 2026 VeDollar Hub. All Rights Reserved.</div>
     </div>
 
     <div class="modal" id="benefitModal">
         <div class="modal-content">
-            <h3 style="color:#fb923c; margin-bottom:10px;"><i class="fas fa-star"></i> Benefit</h3>
-            <p id="benefitText" style="color:#ccc; font-size:13px; white-space:pre-line; text-align:left;">Memuat...</p>
+            <h3 style="color:#fb923c; margin-bottom:10px;">Benefit</h3>
+            <p id="benefitText" style="color:#ccc; font-size:13px; white-space:pre-line; text-align:left;">...</p>
             <button onclick="document.getElementById('benefitModal').style.display='none'" style="margin-top:20px; width:100%; padding:10px; background:#334155; color:white; border:none; border-radius:8px;">Tutup</button>
         </div>
     </div>
 
     <div class="modal" id="qrisModal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('qrisModal')">&times;</span>
             <h3 style="color: #6366f1; margin-bottom: 5px;">Scan QRIS</h3>
-            <div class="qr-frame" id="qrCodePlace"></div>
+            <div id="qrCodePlace" style="background:white; padding:10px; border-radius:10px; margin:15px 0;"></div>
             <p style="font-size: 14px; color: white;">Total: <b id="qrisAmount" style="color:#22c55e">Rp 0</b></p>
-            <p style="font-size: 11px; color: #aaa; margin-top: 5px;">Sistem akan mengecek otomatis.</p>
-            <button onclick="window.location.reload()" style="margin-top:15px; padding:10px; width:100%; background:var(--primary); color:white; border:none; border-radius:10px; cursor:pointer;">Tutup</button>
+            <p style="font-size: 11px; color: #aaa; margin-top: 5px;">Sistem cek otomatis. Jangan ditutup.</p>
+            <button onclick="location.reload()" style="margin-top:15px; padding:8px 20px; background:#334155; color:white; border:none; border-radius:8px;">Tutup</button>
         </div>
     </div>
 
@@ -141,13 +111,14 @@
         <div class="modal-content">
             <div style="font-size: 50px; color: #22c55e; margin-bottom: 10px;"><i class="fas fa-check-circle"></i></div>
             <h3 style="color: var(--success); margin-bottom: 5px;">Transaksi Sukses!</h3>
-            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Simpan data di bawah ini:</p>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Simpan data penting berikut:</p>
 
             <div class="server-details-box" id="hostingDetails" style="display:none;">
-                <div class="copy-box" style="text-align:left;">
-                    URL: <span id="resUrl">...</span><br>
-                    User: <span id="resUser">...</span><br>
-                    Pass: <span id="resPass">...</span>
+                <div class="copy-box">
+                    <b>PANEL CREDENTIALS:</b><br>
+                    URL: <span id="resUrl" style="color:#fff">...</span><br>
+                    User: <span id="resUser" style="color:#fff">...</span><br>
+                    Pass: <span id="resPass" style="color:#fff">...</span>
                 </div>
             </div>
             
@@ -155,7 +126,7 @@
                 <div class="copy-box" id="resAccount">...</div>
             </div>
 
-            <p class="timer-warning" id="timerText" style="margin-top:10px;">Tunggu sebentar...</p>
+            <p class="timer-warning" id="timerText" style="margin-top:15px; color:#f59e0b; font-style:italic; font-size:12px;">Mohon tunggu 10 detik...</p>
             <button id="btnCloseServerModal" onclick="location.reload()" style="display:none; margin-top:15px; width:100%; padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer;">OK, Sudah Disimpan</button>
         </div>
     </div>
@@ -168,60 +139,49 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, getDoc, query, where, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34",
             authDomain: "vedollar-hub.firebaseapp.com",
             projectId: "vedollar-hub",
             storageBucket: "vedollar-hub.firebasestorage.app",
             messagingSenderId: "1091182084872",
-            appId: "1:1091182084872:web:d38ba494182e8cebcba2bd",
-            measurementId: "G-Y7JXCTLN9Q"
+            appId: "1:1091182084872:web:d38ba494182e8cebcba2bd"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- CONFIG ---
-        const ADMIN_WA = "6285123456789"; // GANTI NO WA ADMIN DISINI
+        // --- NOMOR WA ADMIN VPS ---
+        const ADMIN_WA = "15812811162"; 
 
         window.currentCategory = 'botwa';
         window.selectedProductData = null;
         window.benefitData = {};
 
-        // --- LOAD BENEFIT DATA ---
         async function loadBenefits() {
             try {
                 const docSnap = await getDoc(doc(db, "settings", "benefits"));
                 if(docSnap.exists()) window.benefitData = docSnap.data();
-            } catch(e) { console.log("No benefits loaded"); }
+            } catch(e) {}
         }
         loadBenefits();
 
-        // --- SHOW BENEFIT ---
         window.showBenefit = () => {
-            const cat = window.currentCategory;
-            let text = window.benefitData[cat] || "Belum ada info benefit.";
+            const text = window.benefitData[window.currentCategory] || "Belum ada info benefit.";
             document.getElementById('benefitText').innerText = text;
             document.getElementById('benefitModal').style.display = 'flex';
         }
 
-        // --- GANTI KATEGORI ---
         window.switchCat = (catId) => {
             window.currentCategory = catId;
             window.selectedProductData = null;
-            
-            // 1. UI Button Active
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            // 2. Logic Form (Sembunyikan Input jika VPS/App)
+            // HIDE/SHOW FORM INPUT
             const formCard = document.getElementById('formCard');
-            if (['botwa', 'bottg'].includes(catId)) {
-                formCard.style.display = 'block'; 
-            } else {
-                formCard.style.display = 'none'; 
-            }
+            if (['botwa', 'bottg'].includes(catId)) formCard.style.display = 'block'; 
+            else formCard.style.display = 'none'; 
 
             renderProducts(catId);
         }
@@ -232,38 +192,28 @@
             
             try {
                 const q = query(collection(db, "products"), where("category", "==", cat));
-                const querySnapshot = await getDocs(q);
-
+                const snap = await getDocs(q);
                 container.innerHTML = '';
 
-                if (querySnapshot.empty) {
-                    container.innerHTML = `<p style="text-align:center; color:#64748b;">Produk Kosong (Cek Admin Panel).</p>`;
+                if (snap.empty) {
+                    container.innerHTML = `<p style="text-align:center; color:#64748b;">Produk Kosong.</p>`;
                 } else {
-                    querySnapshot.forEach((docSnap) => {
+                    snap.forEach((docSnap) => {
                         const data = docSnap.data();
                         const card = document.createElement('div');
                         card.className = 'product-card';
                         
-                        // Cek Stok (App Premium)
                         let stockBadge = "";
                         let isHabis = false;
 
                         if (cat === 'app') {
                             const count = data.stock ? data.stock.length : 0;
                             if(count > 0) stockBadge = `<span class="badge-stock stock-ready">Sisa ${count}</span>`;
-                            else {
-                                stockBadge = `<span class="badge-stock stock-empty">HABIS</span>`;
-                                isHabis = true;
-                            }
+                            else { stockBadge = `<span class="badge-stock stock-empty">HABIS</span>`; isHabis = true; }
                         }
 
-                        let desc = data.description || "Layanan Terbaik";
-
                         card.innerHTML = `
-                            <div class="product-info">
-                                <h4>${data.name} ${stockBadge}</h4>
-                                <p>${desc}</p>
-                            </div>
+                            <div class="product-info"><h4>${data.name} ${stockBadge}</h4><p>${data.description || "Layanan Terbaik"}</p></div>
                             <div class="product-price">Rp ${data.price.toLocaleString()}</div>
                         `;
                         
@@ -273,45 +223,34 @@
                                 card.classList.add('selected');
                                 window.selectedProductData = { id: docSnap.id, ...data, category: cat };
                             };
-                        } else {
-                            card.style.opacity = "0.6";
-                            card.style.cursor = "not-allowed";
-                        }
+                        } else { card.style.opacity = "0.6"; card.style.cursor = "not-allowed"; }
                         container.appendChild(card);
                     });
                 }
             } catch (error) { console.error(error); }
         }
-        
-        // Init Load
         renderProducts('botwa');
 
-        // --- CHECKOUT ---
         window.processCheckout = async function() {
             const btn = document.querySelector('.btn-checkout');
-            
-            // Cek Pilihan Produk
-            if(!window.selectedProductData) return showToast("Pilih produk dulu!", "error");
+            if(!window.selectedProductData) return Toastify({text:"Pilih produk dulu!", backgroundColor:"#ef4444"}).showToast();
 
-            // --- JIKA VPS (MANUAL VIA WA) ---
+            // --- VPS MANUAL ---
             if (window.currentCategory === 'vps') {
                 const msg = `halo min, saya tertarik dengan ${window.selectedProductData.name} apakah stock masih tersedia?`;
                 window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`, '_blank');
                 return;
             }
 
-            // --- DATA INPUT (Hanya untuk Bot) ---
-            let username = "Guest";
-            let email = "guest@no-email.com";
-            let password = "manual-process";
-            let wa = "00000000000"; 
+            // --- INPUT DATA ---
+            let username = "Guest", email = "guest@no-email.com", password = "manual-process", wa = "00000000000";
 
+            // Jika BOT: Ambil dari input
             if (['botwa', 'bottg'].includes(window.currentCategory)) {
                 username = document.getElementById('inpUsername').value;
                 email = document.getElementById('inpEmail').value;
                 password = document.getElementById('inpPass').value;
-                
-                if(!username || !email || !password) return showToast("Lengkapi data Panel Bot!", "error");
+                if(!username || !email || !password) return Toastify({text:"Lengkapi data panel!", backgroundColor:"#ef4444"}).showToast();
             }
 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
@@ -322,7 +261,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username, email, password, whatsapp: wa, 
+                        username, email, password, whatsapp: wa,
                         product: window.selectedProductData.name,
                         price: window.selectedProductData.price.toString().replace(/\D/g,''),
                         category: window.selectedProductData.category,
@@ -334,7 +273,7 @@
 
                 if (result.success && result.qris_content) {
                     const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(result.qris_content)}&size=300&ecLevel=L&margin=1`;
-                    document.getElementById('qrCodePlace').innerHTML = `<img src="${qrUrl}" style="width:100%; max-width:280px; border-radius:8px; display:block; margin:0 auto;" alt="QRIS Code">`;
+                    document.getElementById('qrCodePlace').innerHTML = `<img src="${qrUrl}" style="width:100%">`;
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price.toLocaleString();
                     document.getElementById('qrisModal').style.display = "flex";
                     btn.innerHTML = 'BAYAR SEKARANG';
@@ -342,56 +281,54 @@
 
                     const orderDocRef = doc(db, "orders", result.order_id);
                     const unsubscribe = onSnapshot(orderDocRef, (docSnap) => {
-                        if (docSnap.exists()) {
+                        if (docSnap.exists() && docSnap.data().status === 'PAID') {
                             const data = docSnap.data();
-                            if (data.status === 'PAID') {
-                                document.getElementById('qrisModal').style.display = "none";
-                                document.getElementById('serverDetailModal').style.display = 'flex';
-                                
-                                if (window.currentCategory === 'app') {
-                                    document.getElementById('hostingDetails').style.display = 'none';
-                                    document.getElementById('appDetails').style.display = 'block';
-                                    document.getElementById('resAccount').innerHTML = data.delivered_account || "Sedang diproses...";
-                                } else {
-                                    document.getElementById('hostingDetails').style.display = 'block';
-                                    document.getElementById('appDetails').style.display = 'none';
-                                    document.getElementById('resUrl').innerText = data.panel_url || "Proses...";
-                                    document.getElementById('resUser').innerText = data.username;
-                                    document.getElementById('resPass').innerText = data.password;
-                                }
-
-                                let timeLeft = 5;
-                                const timerText = document.getElementById('timerText');
-                                const closeBtn = document.getElementById('btnCloseServerModal');
-                                const countdown = setInterval(() => {
-                                    timeLeft--;
-                                    timerText.innerText = `Boleh ditutup dalam ${timeLeft}s...`;
-                                    if(timeLeft <= 0) {
-                                        clearInterval(countdown);
-                                        timerText.style.display = 'none';
-                                        closeBtn.style.display = "block";
-                                    }
-                                }, 1000);
-                                unsubscribe();
+                            document.getElementById('qrisModal').style.display = "none";
+                            document.getElementById('serverDetailModal').style.display = 'flex';
+                            
+                            // TAMPILKAN DATA
+                            if (window.currentCategory === 'app') {
+                                document.getElementById('hostingDetails').style.display = 'none';
+                                document.getElementById('appDetails').style.display = 'block';
+                                document.getElementById('resAccount').innerHTML = `<b>DATA AKUN:</b><br>${data.delivered_account || "Proses..."}`;
+                            } else {
+                                document.getElementById('hostingDetails').style.display = 'block';
+                                document.getElementById('appDetails').style.display = 'none';
+                                document.getElementById('resUrl').innerText = data.panel_url || "...";
+                                document.getElementById('resUser').innerText = data.username; // Ptero Username
+                                document.getElementById('resPass').innerText = data.password;
                             }
+
+                            // TIMER 10 DETIK
+                            let timeLeft = 10;
+                            const timerText = document.getElementById('timerText');
+                            const closeBtn = document.getElementById('btnCloseServerModal');
+                            timerText.style.display = 'block';
+                            closeBtn.style.display = 'none';
+
+                            const countdown = setInterval(() => {
+                                timeLeft--;
+                                timerText.innerText = `Mohon tunggu ${timeLeft} detik...`;
+                                if(timeLeft <= 0) {
+                                    clearInterval(countdown);
+                                    timerText.style.display = 'none';
+                                    closeBtn.style.display = "block";
+                                }
+                            }, 1000);
+                            unsubscribe();
                         }
                     });
-
                 } else {
-                    showToast("Gagal: " + (result.error), "error");
+                    Toastify({text: result.error || "Gagal", backgroundColor:"#ef4444"}).showToast();
                     btn.disabled = false; btn.innerHTML = 'BAYAR SEKARANG';
                 }
             } catch (error) {
-                console.error(error);
-                showToast("Server Error", "error");
+                Toastify({text:"Server Error", backgroundColor:"#ef4444"}).showToast();
                 btn.disabled = false; btn.innerHTML = 'BAYAR SEKARANG';
             }
         };
 
-        function showToast(msg, type) { Toastify({ text: msg, duration: 3000, gravity: "top", position: "center", backgroundColor: type === "success" ? "#22c55e" : "#ef4444" }).showToast(); }
         AOS.init();
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-        
         particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "size": { "value": 3 } } });
     </script>
 </body>
