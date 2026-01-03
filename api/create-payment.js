@@ -6,47 +6,65 @@ export default async function handler(req, res) {
 
     const { username, email, password, whatsapp, product, price, category, ram, cpu, disk } = req.body;
 
-    // 2. Validasi
+    // 2. Validasi Data Masuk
     if (!username || !email || !password || !whatsapp) {
-        return res.status(400).json({ error: 'Data tidak lengkap' });
+        return res.status(400).json({ error: 'Data formulir tidak lengkap.' });
     }
 
     try {
         const orderId = `ORDER-${new Date().getTime()}-${Math.floor(Math.random() * 1000)}`;
 
-        // 3. SIAPKAN DATA KE PAKASIR (FORMAT FORM DATA)
-        // Pakasir mewajibkan format x-www-form-urlencoded, bukan JSON.
-        const params = new URLSearchParams();
-        params.append('api_key', process.env.PAKASIR_API_KEY);
-        params.append('project_id', process.env.PAKASIR_PROJECT_ID);
-        params.append('amount', price);
-        params.append('order_id', orderId);
-        params.append('description', `Beli ${product}`);
-        params.append('payment_method', 'qris');
-        params.append('customer_name', username);
-        params.append('customer_email', email);
-        params.append('customer_phone', whatsapp);
+        // 3. SIAPKAN DATA KE PAKASIR
+        // Kita gunakan JSON.stringify karena lebih stabil di Node.js daripada URLSearchParams
+        // Pastikan amount diubah menjadi integer (angka bulat)
+        const payload = {
+            api_key: process.env.PAKASIR_API_KEY,
+            project_id: process.env.PAKASIR_PROJECT_ID,
+            amount: parseInt(price), // Pastikan ini angka
+            order_id: orderId,
+            description: `Beli ${product}`,
+            payment_method: "qris",
+            customer_name: username,
+            customer_email: email,
+            customer_phone: whatsapp
+        };
 
-        // 4. KIRIM FETCH
+        // 4. KIRIM KE PAKASIR (Pakai JSON)
         const pakasirReq = await fetch('https://pakasir.com/api/create-transaction', {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/x-www-form-urlencoded' // <--- INI KUNCINYA
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: params // Kirim params, bukan JSON.stringify
+            body: JSON.stringify(payload)
         });
+
+        // Cek jika URL salah atau server Pakasir down
+        if (!pakasirReq.ok) {
+            const text = await pakasirReq.text();
+            console.error("Pakasir HTTP Error:", text);
+            return res.status(500).json({ error: `Pakasir Error: ${pakasirReq.status} ${pakasirReq.statusText}` });
+        }
 
         const pakasirRes = await pakasirReq.json();
 
-        // 5. Cek Respon
-        if (!pakasirRes.success && !pakasirRes.data?.qr_string && !pakasirRes.qr_string) {
-            console.error("Pakasir Gagal:", JSON.stringify(pakasirRes));
-            return res.status(500).json({ error: 'Gagal generate QRIS. Cek API Key.' });
+        // 5. CEK APAKAH PAKASIR MENOLAK?
+        // Jika success false, kita ambil pesan error aslinya
+        if (!pakasirRes.success) {
+            console.error("Pakasir Menolak:", JSON.stringify(pakasirRes));
+            // Ambil pesan error spesifik dari Pakasir
+            const msg = pakasirRes.message || pakasirRes.error || "Gagal membuat QRIS (API Key/Project ID Salah?)";
+            return res.status(400).json({ error: msg });
         }
 
+        // Ambil QR String (bisa ada di data.qr_string atau langsung di qr_string tergantung versi API)
         const qrString = pakasirRes.data ? pakasirRes.data.qr_string : pakasirRes.qr_string;
 
-        // 6. Simpan ke Firebase
+        if (!qrString) {
+            return res.status(500).json({ error: "QR String tidak ditemukan dalam respon Pakasir." });
+        }
+
+        // 6. Simpan ke Firebase (Username ASLI dari input user)
         await db.collection('orders').doc(orderId).set({
             order_id: orderId,
             username, email, password, whatsapp,
