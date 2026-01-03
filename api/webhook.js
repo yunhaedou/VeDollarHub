@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
     const data = req.body;
-    console.log("Webhook Masuk:", JSON.stringify(data));
+    console.log("Webhook:", JSON.stringify(data));
 
     const orderId = data.order_id;
     const status = data.status; 
@@ -22,38 +22,45 @@ export default async function handler(req, res) {
             const orderData = orderSnap.data();
             if (orderData.status === 'PAID') return res.status(200).send('Already Processed');
 
-            // --- UPDATE STATUS & SIMPAN URL PANEL ---
+            // --- 1. PROSES USER PTERODACTYL ---
+            // Kita jalankan ini DULUAN untuk mendapatkan Username Final (misal: caspertes80)
+            let pteroResult = null;
+            try {
+                pteroResult = await ensurePteroUser({
+                    email: orderData.email,
+                    username: orderData.username,
+                    password: orderData.password
+                });
+                
+                // --- 2. BUAT SERVER ---
+                // Gunakan pteroResult.id
+                await createPteroServer(pteroResult.id, orderData.category, {
+                    ram: orderData.ram || 1024,
+                    cpu: orderData.cpu || 100,
+                    disk: orderData.disk || 1000
+                });
+                
+            } catch (err) {
+                console.error("Gagal Ptero:", err);
+                // Lanjut update firebase dulu biar status PAID tetap masuk walau server gagal
+            }
+
+            // --- 3. UPDATE FIREBASE (Status & Username Final) ---
+            // Ini akan mentrigger Frontend untuk menampilkan username yang benar (caspertes80)
             await orderRef.update({ 
                 status: 'PAID', 
                 paidAt: new Date().toISOString(),
                 payment_method: data.payment_method || 'qris',
                 
-                // INI KUNCINYA: Simpan URL dari Variabel Vercel ke Database
+                // Simpan URL Panel
                 panel_url: process.env.PTERO_URL, 
                 
+                // [PENTING] Update Username di Database dengan hasil generate Ptero
+                // Jika pteroResult ada, pakai username barunya. Jika gagal, pakai username lama.
+                username: pteroResult ? pteroResult.username : orderData.username, 
+
                 pakasir_data: data
             });
-
-            // --- PROSES PEMBUATAN SERVER ---
-            try {
-                const pteroUserId = await ensurePteroUser({
-                    email: orderData.email,
-                    username: orderData.username,
-                    password: orderData.password
-                });
-
-                const resources = {
-                    ram: orderData.ram || 1024,
-                    cpu: orderData.cpu || 100,
-                    disk: orderData.disk || 1000
-                };
-                
-                await createPteroServer(pteroUserId, orderData.category, resources);
-                console.log("Server Created!");
-                
-            } catch (pteroError) {
-                console.error("GAGAL AUTO-CREATE SERVER:", pteroError);
-            }
 
             return res.status(200).json({ success: true });
 
