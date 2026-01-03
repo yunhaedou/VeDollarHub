@@ -1,74 +1,73 @@
+import axios from 'axios';
 import { PTERO_CONFIG } from '../config.js';
 
-// Helper Fetch Wrapper
-async function pteroFetch(endpoint, method = 'GET', body = null) {
-    const url = `${PTERO_CONFIG.domain}${endpoint}`;
-    const options = {
-        method,
-        headers: {
-            'Authorization': `Bearer ${PTERO_CONFIG.apiKey}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    };
-    if (body) options.body = JSON.stringify(body);
-
-    const req = await fetch(url, options);
-    const res = await req.json();
-
-    if (!req.ok) {
-        // Coba baca error message dari Ptero
-        const errMsg = res.errors ? res.errors[0].detail : "Unknown Ptero Error";
-        throw new Error(errMsg);
+const api = axios.create({
+    baseURL: PTERO_CONFIG.domain,
+    headers: {
+        'Authorization': `Bearer ${PTERO_CONFIG.apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
     }
-    return res;
-}
+});
 
-// Helper Get Egg
 async function getEggDetails(nestId, eggId) {
-    const res = await pteroFetch(`/api/application/nests/${nestId}/eggs/${eggId}`);
-    return res.attributes;
+    try {
+        const res = await api.get(`/api/application/nests/${nestId}/eggs/${eggId}`);
+        return res.data.attributes;
+    } catch (error) {
+        throw new Error("Gagal fetch Egg: " + error.message);
+    }
 }
 
-// 1. CEK KETERSEDIAAN (Dipakai create-payment.js)
+// FUNGSI CEK KETERSEDIAAN (Hanya Cek Email, Username biar dihandle randomizer)
 export async function checkPteroAvailability(username, email) {
     try {
-        const userCheck = await pteroFetch(`/api/application/users?filter[username]=${username}`);
-        if (userCheck.data.length > 0) return "Username sudah dipakai! Ganti yang lain.";
-
-        const emailCheck = await pteroFetch(`/api/application/users?filter[email]=${email}`);
-        if (emailCheck.data.length > 0) return "Email sudah terdaftar!";
-        
-        return null;
+        // Kita hanya cek email, karena username nanti akan di-random kalau duplikat
+        const emailCheck = await api.get(`/api/application/users?filter[email]=${email}`);
+        if (emailCheck.data.data.length > 0) {
+            return "Email sudah terdaftar! Gunakan email lain.";
+        }
+        return null; 
     } catch (error) {
-        console.error("Skip Ptero Check:", error.message);
         return null; 
     }
 }
 
-// 2. BUAT USER (Persis Input)
+// FUNGSI BUAT USER (DENGAN RANDOMIZER & RETURN USERNAME FINAL)
 export async function ensurePteroUser(userData) {
-    // Cek dulu
-    const search = await pteroFetch(`/api/application/users?filter[email]=${userData.email}`);
-    if (search.data.length > 0) return search.data[0].attributes.id;
+    // 1. Cek User by Email
+    const search = await api.get(`/api/application/users?filter[email]=${userData.email}`);
+    
+    if (search.data.data.length > 0) {
+        // Jika user lama ketemu, kembalikan ID dan Username lamanya
+        return {
+            id: search.data.data[0].attributes.id,
+            username: search.data.data[0].attributes.username
+        };
+    }
 
-    // Bersihkan username (Hanya huruf angka, tanpa spasi, TANPA ANGKA ACAK)
-    const cleanUsername = userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    // 2. Buat User Baru (LOGIKA: Tambah Angka Acak agar Unik)
+    // Contoh: 'caspertes' -> 'caspertes88'
+    const randomSuffix = Math.floor(Math.random() * 100);
+    const finalUsername = userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + randomSuffix;
 
-    const newUser = await pteroFetch('/api/application/users', 'POST', {
+    const newUser = await api.post('/api/application/users', {
         email: userData.email,
-        username: cleanUsername,
+        username: finalUsername, // Pakai username yang ada angkanya
         first_name: userData.username,
-        last_name: "(Customer)",
+        last_name: "(BuyVeDollarr)",
         password: userData.password,
         root_admin: false,
         language: "en"
     });
 
-    return newUser.attributes.id;
+    // Kembalikan Object: ID dan Username Final
+    return {
+        id: newUser.data.attributes.id,
+        username: newUser.data.attributes.username // Ini nanti disimpan ke Firebase
+    };
 }
 
-// 3. BUAT SERVER
 export async function createPteroServer(userId, productType, resources) {
     const config = PTERO_CONFIG.games[productType];
     if (!config) throw new Error("Tipe game tidak dikenali");
@@ -104,6 +103,6 @@ export async function createPteroServer(userId, productType, resources) {
         }
     };
 
-    const res = await pteroFetch('/api/application/servers', 'POST', payload);
-    return res.attributes;
+    const res = await api.post('/api/application/servers', payload);
+    return res.data.attributes;
 }
