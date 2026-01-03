@@ -3,69 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - VeDollar Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Admin Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
     <style>
-        body { background: #0f172a; color: white; font-family: 'Poppins', sans-serif; padding: 20px; }
+        :root { --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.7); --glass-border: 1px solid rgba(255, 255, 255, 0.1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-color); color: white; padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; }
-        .card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-        input, select, textarea { width: 100%; background: #1e293b; border: 1px solid #334155; padding: 10px; color: white; border-radius: 6px; margin-top: 5px; margin-bottom: 10px; }
-        .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .glass-card { background: var(--glass-bg); border: var(--glass-border); border-radius: 16px; padding: 25px; margin-bottom: 25px; }
+        .input-field, select, textarea { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 10px; border-radius: 8px; color: #fff; outline: none; margin-bottom: 10px; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
         .btn-green { background: #22c55e; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
-        .btn-red { background: #ef4444; color: white; width: auto; padding: 5px 10px; }
+        .btn-purple { background: #a855f7; color: white; }
+        .btn-del { background: #ef4444; color: white; width: auto; padding: 5px 15px; margin: 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #334155; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #334155; }
+        h3 { margin-bottom: 15px; font-size: 18px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Admin Panel</h2>
-        <a href="index.html" style="color:#94a3b8; text-decoration:none;">&larr; Kembali ke Toko</a><br><br>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>Admin Panel</h2>
+            <a href="index.html" style="color:#aaa; text-decoration:none; font-size:14px;"><i class="fas fa-arrow-left"></i> Kembali</a>
+        </div>
 
-        <div class="card" style="border-left: 4px solid #22c55e;">
-            <h3><i class="fas fa-cube"></i> Tambah App Premium (Auto Stock)</h3>
-            <p style="font-size:11px; color:#aaa">Format Stok: <code>akun1|pass|info : akun2|pass|info : akun3...</code> (Pemisah antar akun adalah titik dua <b>:</b> )</p>
+        <div class="glass-card" style="border-left: 4px solid #22c55e;">
+            <h3 style="color:#4ade80"><i class="fas fa-cube"></i> Tambah App Premium</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">Format Stok: <code>akun1|pass : akun2|pass</code> (Pemisah pakai titik dua <b>:</b> )</p>
             
-            <label>Nama App</label>
-            <input type="text" id="appName" placeholder="Contoh: Netflix Premium 1 Bulan">
+            <input type="text" id="appName" class="input-field" placeholder="Nama App (Misal: Netflix 1 Bulan)">
+            <input type="number" id="appPrice" class="input-field" placeholder="Harga (Rp)">
+            <textarea id="appStock" class="input-field" rows="3" placeholder="email1@gmail.com|pass|info : email2@gmail.com|pass|info"></textarea>
             
-            <label>Harga (Rp)</label>
-            <input type="number" id="appPrice" placeholder="25000">
-
-            <label>Data Stok (Pisahkan dengan : )</label>
-            <textarea id="appStock" rows="4" placeholder="a@email.com|pass|link : b@email.com|pass|link"></textarea>
-
             <button class="btn btn-green" onclick="addAppProduct()">Simpan App Premium</button>
         </div>
 
-        <div class="card" style="border-left: 4px solid #3b82f6;">
-            <h3><i class="fas fa-server"></i> Tambah Bot / VPS</h3>
-            <label>Nama Layanan</label>
-            <input type="text" id="hostName" placeholder="Contoh: VPS 2GB / Bot WhatsApp">
+        <div class="glass-card" style="border-left: 4px solid #3b82f6;">
+            <h3 style="color:#60a5fa"><i class="fas fa-robot"></i> Tambah Hosting Bot (Auto)</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">Untuk Bot WhatsApp & Telegram (Auto Create Pterodactyl).</p>
+
+            <input type="text" id="hostName" class="input-field" placeholder="Nama Paket (Misal: Bot WA Basic)">
+            <input type="number" id="hostPrice" class="input-field" placeholder="Harga (Rp)">
             
-            <label>Harga (Rp)</label>
-            <input type="number" id="hostPrice" placeholder="15000">
-            
-            <label>Kategori</label>
-            <select id="hostCat">
-                <option value="botwa">Bot WhatsApp (Auto Create)</option>
-                <option value="bottg">Bot Telegram (Auto Create)</option>
-                <option value="vps">VPS (Manual via WA)</option>
+            <select id="hostCat" class="input-field">
+                <option value="botwa">Bot WhatsApp</option>
+                <option value="bottg">Bot Telegram</option>
             </select>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                <input type="number" id="hostRam" class="input-field" placeholder="RAM (MB)" value="1024">
+                <input type="number" id="hostCpu" class="input-field" placeholder="CPU (%)" value="100">
+                <input type="number" id="hostDisk" class="input-field" placeholder="Disk (MB)" value="1000">
+            </div>
 
-            <label>RAM (MB) - Abaikan jika VPS</label>
-            <input type="number" id="hostRam" value="1024">
-
-            <button class="btn btn-blue" onclick="addHostProduct()">Simpan Layanan</button>
+            <button class="btn btn-blue" onclick="addHostProduct()">Simpan Paket Bot</button>
         </div>
 
-        <div class="card">
-            <h3>Daftar Produk</h3>
+        <div class="glass-card" style="border-left: 4px solid #a855f7;">
+            <h3 style="color:#c084fc"><i class="fas fa-server"></i> Tambah VPS (Manual)</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">Hanya data produk. Transaksi diarahkan ke WhatsApp Admin.</p>
+
+            <input type="text" id="vpsName" class="input-field" placeholder="Nama VPS (Misal: VPS 2GB SG)">
+            <input type="number" id="vpsPrice" class="input-field" placeholder="Harga (Rp)">
+            <input type="text" id="vpsDesc" class="input-field" placeholder="Deskripsi (Opsional)">
+            
+            <button class="btn btn-purple" onclick="addVpsProduct()">Simpan Produk VPS</button>
+        </div>
+
+        <div class="glass-card">
+            <h3>Daftar Semua Produk</h3>
             <table id="prodTable">
-                <thead><tr><th>Nama</th><th>Kat</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></thead>
+                <thead><tr><th>Nama</th><th>Kategori</th><th>Harga</th><th>Info/Stok</th><th>Aksi</th></tr></thead>
                 <tbody><tr><td colspan="5">Memuat...</td></tr></tbody>
             </table>
         </div>
@@ -82,74 +96,102 @@
             projectId: "vedollar-hub"
         }));
 
-        // TAMBAH APP PREMIUM
+        // 1. FUNGSI ADD APP PREMIUM
         window.addAppProduct = async () => {
             const name = document.getElementById('appName').value;
             const price = document.getElementById('appPrice').value;
             const rawStock = document.getElementById('appStock').value;
-
-            if(!name || !price || !rawStock) return alert("Lengkapi data!");
-
-            // LOGIKA SPLIT STOK BERDASARKAN ":"
+            
+            if(!name || !price || !rawStock) return alert("Lengkapi data App!");
+            
             const stockArray = rawStock.split(':').map(s => s.trim()).filter(s => s !== "");
 
             try {
                 await addDoc(collection(db, "products"), {
                     name, price: parseInt(price), category: 'app',
-                    stock: stockArray, // Simpan sebagai Array
+                    stock: stockArray,
                     description: "Pengiriman Otomatis"
                 });
-                Toastify({text: `Sukses! ${stockArray.length} stok ditambahkan.`, backgroundColor: "green"}).showToast();
+                Toastify({text: `App tersimpan! ${stockArray.length} stok.`, backgroundColor: "green"}).showToast();
                 document.getElementById('appName').value = ""; document.getElementById('appStock').value = "";
             } catch(e) { alert(e.message); }
         };
 
-        // TAMBAH HOSTING/VPS
+        // 2. FUNGSI ADD HOSTING BOT (Dikembalikan seperti semula)
         window.addHostProduct = async () => {
             const name = document.getElementById('hostName').value;
             const price = document.getElementById('hostPrice').value;
             const cat = document.getElementById('hostCat').value;
             const ram = document.getElementById('hostRam').value;
+            const cpu = document.getElementById('hostCpu').value;
+            const disk = document.getElementById('hostDisk').value;
 
-            if(!name || !price) return alert("Lengkapi data!");
+            if(!name || !price) return alert("Lengkapi data Bot!");
 
             try {
                 await addDoc(collection(db, "products"), {
                     name, price: parseInt(price), category: cat,
-                    description: cat === 'vps' ? 'Proses Manual via WA' : `RAM ${ram}MB (Auto)`,
-                    ram: parseInt(ram), cpu: 100, disk: 1000
+                    description: `RAM ${ram}MB, CPU ${cpu}%`,
+                    ram: parseInt(ram), 
+                    cpu: parseInt(cpu), 
+                    disk: parseInt(disk)
                 });
-                Toastify({text: "Sukses tambah layanan.", backgroundColor: "blue"}).showToast();
+                Toastify({text: "Paket Bot tersimpan.", backgroundColor: "blue"}).showToast();
+                document.getElementById('hostName').value = "";
             } catch(e) { alert(e.message); }
         };
 
-        // LIST
+        // 3. FUNGSI ADD VPS (BARU & TERPISAH)
+        window.addVpsProduct = async () => {
+            const name = document.getElementById('vpsName').value;
+            const price = document.getElementById('vpsPrice').value;
+            const desc = document.getElementById('vpsDesc').value;
+
+            if(!name || !price) return alert("Lengkapi data VPS!");
+
+            try {
+                await addDoc(collection(db, "products"), {
+                    name, price: parseInt(price), category: 'vps',
+                    description: desc || "Manual via WA"
+                });
+                Toastify({text: "Produk VPS tersimpan.", backgroundColor: "#a855f7"}).showToast();
+                document.getElementById('vpsName').value = "";
+            } catch(e) { alert(e.message); }
+        };
+
+        // LOAD LIST
         onSnapshot(query(collection(db, "products"), orderBy("category")), (snap) => {
             const tb = document.querySelector('#prodTable tbody');
             tb.innerHTML = "";
+            if(snap.empty) { tb.innerHTML = "<tr><td colspan='5'>Belum ada produk</td></tr>"; return; }
+
             snap.forEach(d => {
                 const p = d.data();
-                let stockDisplay = "-";
+                let info = "-";
                 
-                // Tampilkan jumlah stok jika App Premium
+                // Tampilkan Info sesuai Kategori
                 if(p.category === 'app') {
                     const count = p.stock ? p.stock.length : 0;
-                    stockDisplay = count > 0 ? `<b style="color:#4ade80">${count}</b>` : `<b style="color:red">HABIS</b>`;
+                    info = count > 0 ? `<b style="color:#4ade80">${count} Akun</b>` : `<b style="color:red">HABIS</b>`;
+                } else if(['botwa','bottg'].includes(p.category)) {
+                    info = `Ram: ${p.ram}MB`;
+                } else if(p.category === 'vps') {
+                    info = "Manual";
                 }
 
                 tb.innerHTML += `
                     <tr>
                         <td>${p.name}</td>
-                        <td>${p.category}</td>
+                        <td><span style="background:#334155; padding:2px 6px; border-radius:4px; font-size:11px;">${p.category}</span></td>
                         <td>${p.price}</td>
-                        <td>${stockDisplay}</td>
-                        <td><button class="btn-red" onclick="del('${d.id}')">Hapus</button></td>
+                        <td>${info}</td>
+                        <td><button class="btn-del" onclick="del('${d.id}')"><i class="fas fa-trash"></i></button></td>
                     </tr>
                 `;
             });
         });
 
-        window.del = async(id) => { if(confirm("Hapus?")) await deleteDoc(doc(db, "products", id)); };
+        window.del = async(id) => { if(confirm("Hapus produk ini?")) await deleteDoc(doc(db, "products", id)); };
     </script>
 </body>
 </html>
