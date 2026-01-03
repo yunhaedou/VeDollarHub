@@ -16,7 +16,7 @@
             --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.7); --glass-border: 1px solid rgba(255, 255, 255, 0.1);
             --primary: #6366f1; --secondary: #a855f7; --text-main: #f8fafc; --text-muted: #94a3b8;
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --success: #22c55e; /* Warna Sukses */
+            --success: #22c55e;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
@@ -78,57 +78,13 @@
         .btn-checkout:disabled { opacity: 0.7; cursor: not-allowed; }
         .btn-checkout:active { transform: scale(0.98); }
 
-        /* --- MODAL --- */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--secondary); animation: popUp 0.4s; position: relative; }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+        /* --- MODAL BASE --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--secondary); animation: popUp 0.4s; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); transition: 0.3s; }
+        .close-modal:hover { color: #fff; }
 
-        /* --- FOOTER --- */
-        .footer { text-align: center; margin-top: 50px; padding: 20px; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); }
-
-        /* --- ANIMATIONS --- */
-        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes zoomEffect { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
-        
-        /* --- CSS UNTUK POPUP QRIS --- */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); 
-            z-index: 9999; 
-            justify-content: center; 
-            align-items: center; 
-            backdrop-filter: blur(5px); 
-        }
-        .modal-content { 
-            background: #1e293b; 
-            padding: 30px; 
-            border-radius: 20px; 
-            width: 90%; 
-            max-width: 350px; 
-            text-align: center; 
-            border: 1px solid #a855f7; 
-            position: relative; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        }
-        .qr-frame {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            display: inline-block;
-            margin: 20px 0;
-            min-height: 250px; /* Biar tidak gepeng saat loading */
-        }
-        .close-modal { 
-            position: absolute; top: 15px; right: 20px; 
-            font-size: 24px; cursor: pointer; color: #94a3b8; 
-        }
-
-        /* --- [BARU] CSS POPUP DETAIL SERVER & COPY BUTTON --- */
+        /* --- CSS POPUP DETAIL SERVER --- */
         .server-details-box {
             background: rgba(0,0,0,0.3);
             border-radius: 10px;
@@ -150,6 +106,18 @@
         }
         .btn-copy:hover { background: var(--primary); color: white; }
         .timer-warning { font-size: 11px; color: #f59e0b; margin-top: 5px; font-style: italic; }
+
+        /* CSS QRIS */
+        .qr-frame { background: white; padding: 15px; border-radius: 10px; display: inline-block; margin: 20px 0; min-height: 250px; }
+
+        /* --- FOOTER --- */
+        .footer { text-align: center; margin-top: 50px; padding: 20px; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes zoomEffect { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
     </style>
 </head>
 <body>
@@ -251,21 +219,20 @@
 
     <div class="modal" id="benefitModal">
         <div class="modal-content">
-            <span class="close-modal" onclick="toggleModal()">&times;</span>
+            <span class="close-modal" onclick="closeModal('benefitModal')">&times;</span>
             <h3 style="color: var(--primary); margin-bottom: 15px;">Keuntungan Premium</h3>
             <div style="text-align: left; color: #cbd5e1; font-size: 14px; line-height: 2;">
                 <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Auto Create Server (Langsung Aktif)</p>
                 <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Panel Pterodactyl Premium</p>
                 <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Anti DDoS Protection</p>
                 <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Uptime 99.9% Guarantee</p>
-                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Full Akses File Manager</p>
             </div>
         </div>
     </div>
 
     <div class="modal" id="qrisModal">
         <div class="modal-content">
-            <span class="close-modal" onclick="document.getElementById('qrisModal').style.display='none'">&times;</span>
+            <span class="close-modal" onclick="closeModal('qrisModal')">&times;</span>
             <h3 style="color: #6366f1; margin-bottom: 5px;">Scan QRIS</h3>
             <p style="font-size: 12px; color: #94a3b8;">Gunakan DANA/Gopay/OVO/BCA</p>
             
@@ -274,15 +241,14 @@
             <p style="font-size: 14px; color: white;">Total: <b id="qrisAmount" style="color:#22c55e">Rp 0</b></p>
             <p style="font-size: 11px; color: #64748b; margin-top: 5px;">Setelah bayar, tunggu admin memproses.</p>
             
-            <button onclick="window.location.reload()" style="margin-top:15px; padding:10px; width:100%; background:#6366f1; color:white; border:none; border-radius:10px; cursor:pointer;">Saya Sudah Bayar</button>
+            <button onclick="window.location.reload()" style="margin-top:15px; padding:10px; width:100%; background:var(--primary); color:white; border:none; border-radius:10px; cursor:pointer;">Saya Sudah Bayar</button>
         </div>
     </div>
 
-    <div class="modal" id="serverDetailModal" style="display: none; z-index: 3000;">
+    <div class="modal" id="serverDetailModal" data-backdrop="static">
         <div class="modal-content">
             <span class="close-modal" id="btnCloseServerModal" style="display: none;" onclick="window.location.reload()">&times;</span>
-            
-            <h3 style="color: #4ade80; margin-bottom: 5px;">Pembayaran Sukses!</h3>
+            <h3 style="color: var(--success); margin-bottom: 5px;">Pembayaran Sukses!</h3>
             <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Server aktif. Simpan data ini sekarang!</p>
 
             <div class="server-details-box">
@@ -322,10 +288,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // [UPDATE] Import doc & onSnapshot untuk fitur Auto-Detect
         import { getFirestore, collection, getDocs, query, where, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- 1. KONFIGURASI FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34",
             authDomain: "vedollar-hub.firebaseapp.com",
@@ -339,7 +303,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // [BARU] Fungsi Copy Button
+        // --- FUNGSI COPY ---
         window.copyToClip = (elementId, btn) => {
             const text = document.getElementById(elementId).innerText;
             navigator.clipboard.writeText(text).then(() => {
@@ -355,34 +319,27 @@
             });
         }
 
-        // --- 2. LOGIC RENDER PRODUK ---
+        // --- RENDER PRODUK ---
         window.selectedProductData = null;
-
         async function fetchAndRenderProducts() {
             const container = document.getElementById('pricelist-container');
             const categories = ['botwa', 'bottg', 'mc', 'samp'];
-            
-            // Reset Container
             container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>';
 
             for (const cat of categories) {
-                // Wrapper per kategori
                 const catDiv = document.createElement('div');
                 catDiv.id = cat;
                 catDiv.className = `price-category ${cat === 'botwa' ? 'active' : ''}`;
                 
                 try {
-                    // Ambil data firebase
                     const q = query(collection(db, "products"), where("category", "==", cat));
                     const querySnapshot = await getDocs(q);
 
                     if (querySnapshot.empty) {
-                        catDiv.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px; font-size:12px;">Produk belum tersedia di kategori ini.</p>`;
+                        catDiv.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px; font-size:12px;">Produk Kosong.</p>`;
                     } else {
                         querySnapshot.forEach((doc) => {
                             const data = doc.data();
-                            
-                            // Siapkan tampilan RAM/CPU jika ada
                             let spekInfo = "";
                             if(data.ram) {
                                 spekInfo = `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">
@@ -390,45 +347,27 @@
                                     <i class="fas fa-microchip" style="margin-left:5px;"></i> ${data.cpu}%
                                 </div>`;
                             }
-
                             const card = document.createElement('div');
                             card.className = 'price-card';
-                            card.innerHTML = `
-                                <div class="price-info">
-                                    <h4>${data.name}</h4>
-                                    <p>${data.description}</p>
-                                    ${spekInfo}
-                                </div>
-                                <div class="price-tag">Rp ${data.price}</div>
-                            `;
-                            // Event Listener Klik Produk
+                            card.innerHTML = `<div class="price-info"><h4>${data.name}</h4><p>${data.description}</p>${spekInfo}</div><div class="price-tag">Rp ${data.price}</div>`;
                             card.onclick = function() {
                                 document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
                                 card.classList.add('selected');
                                 window.selectedProductData = {
-                                    name: data.name,
-                                    price: data.price,
-                                    category: data.category,
-                                    // DATA SPEK
-                                    ram: data.ram,
-                                    cpu: data.cpu,
-                                    disk: data.disk
+                                    name: data.name, price: data.price, category: data.category,
+                                    ram: data.ram, cpu: data.cpu, disk: data.disk
                                 };
                             };
                             catDiv.appendChild(card);
                         });
                     }
                     container.appendChild(catDiv);
-                } catch (error) {
-                    console.error("Error fetching products:", error);
-                    container.innerHTML += `<p style="color:red; text-align:center; font-size:12px;">Gagal memuat data. Cek koneksi.</p>`;
-                }
+                } catch (error) { console.error("Error:", error); }
             }
         }
-
         fetchAndRenderProducts();
 
-        // --- 3. LOGIC CHECKOUT (QuickChart + Auto Detect + Popup Logic) ---
+        // --- CHECKOUT LOGIC (URL dari Database) ---
         window.processCheckout = async function() {
             const btn = document.querySelector('.btn-checkout');
             const username = document.getElementById('inpUsername').value;
@@ -436,16 +375,10 @@
             const email = document.getElementById('inpEmail').value;
             const password = document.getElementById('inpPass').value;
 
-            if(!username || !wa || !email || !password) {
-                showToast("Mohon lengkapi semua data akun!", "error");
-                return;
-            }
-            if(!window.selectedProductData) {
-                showToast("Silakan pilih paket terlebih dahulu!", "error");
-                return;
-            }
+            if(!username || !wa || !email || !password) return showToast("Lengkapi semua data akun!", "error");
+            if(!window.selectedProductData) return showToast("Pilih paket terlebih dahulu!", "error");
 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses Order...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
 
             try {
@@ -453,16 +386,11 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: username,
-                        email: email,
-                        password: password,
-                        whatsapp: wa,
+                        username: username, email: email, password: password, whatsapp: wa,
                         product: window.selectedProductData.name,
-                        price: window.selectedProductData.price.replace(/\D/g,''), // Hapus 'Rp' ambil angkanya saja
+                        price: window.selectedProductData.price.replace(/\D/g,''),
                         category: window.selectedProductData.category,
-                        ram: window.selectedProductData.ram,
-                        cpu: window.selectedProductData.cpu,
-                        disk: window.selectedProductData.disk
+                        ram: window.selectedProductData.ram, cpu: window.selectedProductData.cpu, disk: window.selectedProductData.disk
                     })
                 });
 
@@ -471,42 +399,34 @@
                 if (result.success && result.qris_content) {
                     showToast("Order Dibuat! Silakan Scan.", "success");
                     
-                    // --- TAMPILKAN QR (QuickChart API) ---
                     const qrContainer = document.getElementById('qrCodePlace');
                     const qrImageUrl = `https://quickchart.io/qr?text=${encodeURIComponent(result.qris_content)}&size=300&ecLevel=L&margin=1`;
-                    qrContainer.innerHTML = `<img src="${qrImageUrl}" style="width:100%; max-width:250px; border-radius:8px;" alt="QRIS Code">`;
+                    qrContainer.innerHTML = `<img src="${qrImageUrl}" style="width:100%; max-width:280px; border-radius:8px; display:block; margin:0 auto;" alt="QRIS Code">`;
 
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
                     document.getElementById('qrisModal').style.display = "flex";
-                    
                     btn.innerHTML = 'BAYAR SEKARANG';
                     btn.disabled = false;
 
-                    // --- [LOGIKA BARU] AUTO DETECT & POPUP SERVER ---
-                    // Menggunakan listener firebase (onSnapshot)
+                    // --- DETEKSI PEMBAYARAN & TAMPILKAN POPUP SERVER ---
                     const orderDocRef = doc(db, "orders", result.order_id);
                     const unsubscribe = onSnapshot(orderDocRef, (docSnap) => {
                         if (docSnap.exists()) {
                             const data = docSnap.data();
-                            
-                            // Jika status berubah jadi PAID
                             if (data.status === 'PAID') {
-                                // 1. Tutup QR
                                 document.getElementById('qrisModal').style.display = "none";
-                                
-                                // 2. Buka Popup Data Server
                                 document.getElementById('serverDetailModal').style.display = 'flex';
                                 
-                                // 3. Isi Data dari Database
+                                // AMBIL URL DARI DATABASE
                                 if (data.panel_url) {
                                     document.getElementById('resUrl').innerText = data.panel_url;
                                 } else {
-                                    document.getElementById('resUrl').innerText = "Cek Email Anda";
+                                    document.getElementById('resUrl').innerText = "https://panel.nosh.id"; // Fallback
                                 }
+
                                 document.getElementById('resUser').innerText = data.username;
                                 document.getElementById('resPass').innerText = data.password;
 
-                                // 4. Jalankan Timer 10 Detik
                                 let timeLeft = 10;
                                 const timerText = document.getElementById('timerText');
                                 const closeBtn = document.getElementById('btnCloseServerModal');
@@ -515,83 +435,47 @@
                                 const countdown = setInterval(() => {
                                     timeLeft--;
                                     timerText.innerText = `Harap backup data! Tombol tutup muncul dalam ${timeLeft}s...`;
-                                    
                                     if(timeLeft <= 0) {
                                         clearInterval(countdown);
                                         timerText.innerText = "Data aman? Silakan tutup popup.";
-                                        timerText.style.color = "#4ade80"; // Hijau
-                                        closeBtn.style.display = "block"; // Munculkan tombol X
+                                        timerText.style.color = "#4ade80";
+                                        closeBtn.style.display = "block";
                                     }
                                 }, 1000);
-                                
-                                // 5. Stop listening
                                 unsubscribe();
                             }
                         }
                     });
 
                 } else {
-                    showToast("Gagal: " + (result.error || "Gagal mengambil data QRIS"), "error");
+                    showToast("Gagal: " + (result.error || "Gagal QRIS"), "error");
                     btn.disabled = false;
                     btn.innerHTML = 'BAYAR SEKARANG';
                 }
 
             } catch (error) {
                 console.error(error);
-                showToast("Terjadi kesalahan server", "error");
+                showToast("Server Error", "error");
                 btn.disabled = false;
                 btn.innerHTML = 'BAYAR SEKARANG';
             }
         };
 
-
-        // Helper Toast
-        function showToast(msg, type) {
-            Toastify({
-                text: msg, duration: 3000, gravity: "top", position: "center", backgroundColor: type === "success" ? "#22c55e" : "#ef4444",
-            }).showToast();
-        }
-
-        // --- 4. UI ANIMATIONS ---
+        function showToast(msg, type) { Toastify({ text: msg, duration: 3000, gravity: "top", position: "center", backgroundColor: type === "success" ? "#22c55e" : "#ef4444" }).showToast(); }
         AOS.init({ duration: 800, once: true });
-
         window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
-
-        window.toggleModal = (id) => {
-            const target = id ? id : 'benefitModal';
-            document.getElementById(target).style.display = 'flex';
-        }
-        window.onclick = function(event) {
-            const modal = document.getElementById('benefitModal');
-            if (event.target == modal) modal.style.display = "none";
-        }
-
+        window.toggleModal = (id) => document.getElementById(id ? id : 'benefitModal').style.display = 'flex';
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
         window.switchCategory = (catId) => {
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
             document.querySelectorAll('.price-category').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById(catId);
-            if(target) target.classList.add('active');
+            if(document.getElementById(catId)) document.getElementById(catId).classList.add('active');
         }
-
-        let slideIndex = 0;
-        const slides = document.querySelectorAll('.banner-slide');
-        function showSlides() {
-            if(slides.length > 0) {
-                slides.forEach(slide => slide.classList.remove('active'));
-                slideIndex++;
-                if (slideIndex > slides.length) { slideIndex = 1 }
-                slides[slideIndex - 1].classList.add('active');
-                setTimeout(showSlides, 4000);
-            }
-        }
+        let slideIndex = 0; const slides = document.querySelectorAll('.banner-slide');
+        function showSlides() { if(slides.length > 0) { slides.forEach(s => s.classList.remove('active')); slideIndex++; if (slideIndex > slides.length) slideIndex = 1; slides[slideIndex - 1].classList.add('active'); setTimeout(showSlides, 4000); } }
         showSlides();
-
-        particlesJS("particles-js", {
-            "particles": { "number": { "value": 50 }, "color": { "value": "#6366f1" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#a855f7", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 2 } },
-            "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": true, "mode": "push" } } }, "retina_detect": true
-        });
+        particlesJS("particles-js", { "particles": { "number": { "value": 50 }, "color": { "value": "#6366f1" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#a855f7", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 2 } } });
     </script>
 </body>
 </html>
