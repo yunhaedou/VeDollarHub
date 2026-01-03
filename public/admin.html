@@ -132,7 +132,7 @@
             if(!name || !price || !rawStock) return alert("Lengkapi data App!");
             
             // PEMBATAS HANYA TITIK DUA (:)
-            const stockArray = rawStock.split(':').map(s => s.trim()).filter(s => s !== "");
+            const stockArray = rawStock.split('=').map(s => s.trim()).filter(s => s !== "");
 
             try {
                 await addDoc(collection(db, "products"), {
@@ -150,7 +150,7 @@
             const price = document.getElementById('appPrice').value;
             const rawStock = document.getElementById('appStock').value;
             
-            const stockArray = rawStock.split(':').map(s => s.trim()).filter(s => s !== "");
+            const stockArray = rawStock.split('=').map(s => s.trim()).filter(s => s !== "");
 
             try {
                 await updateDoc(doc(db, "products", id), {
@@ -249,7 +249,7 @@
                 document.getElementById('appName').value = p.name;
                 document.getElementById('appPrice').value = p.price;
                 // Gabungkan stok kembali dengan :
-                document.getElementById('appStock').value = (p.stock || []).join(' : '); 
+                document.getElementById('appStock').value = (p.stock || []).join(' = '); 
                 
                 // Ubah Tampilan jadi Edit Mode
                 setEditMode('app', true);
