@@ -1,55 +1,52 @@
 import { db } from './utils/firebase.js';
 
 export default async function handler(req, res) {
-    // 1. Cek Method & Input
+    // 1. Cek Method
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
     const { username, email, password, whatsapp, product, price, category, ram, cpu, disk } = req.body;
 
+    // 2. Validasi
     if (!username || !email || !password || !whatsapp) {
-        return res.status(400).json({ error: 'Data formulir tidak lengkap.' });
+        return res.status(400).json({ error: 'Data tidak lengkap' });
     }
 
     try {
-        // 2. Buat Order ID
         const orderId = `ORDER-${new Date().getTime()}-${Math.floor(Math.random() * 1000)}`;
-        
-        // 3. Request QRIS ke Pakasir
-        // Kita tidak cek username ptero disini, karena nanti webhook yang akan handle randomizernya
-        const payload = {
-            api_key: process.env.PAKASIR_API_KEY,
-            project_id: process.env.PAKASIR_PROJECT_ID,
-            amount: price,
-            order_id: orderId,
-            description: `Beli ${product}`,
-            payment_method: "qris",
-            customer_name: username,
-            customer_email: email,
-            customer_phone: whatsapp
-        };
 
+        // 3. SIAPKAN DATA KE PAKASIR (FORMAT FORM DATA)
+        // Pakasir mewajibkan format x-www-form-urlencoded, bukan JSON.
+        const params = new URLSearchParams();
+        params.append('api_key', process.env.PAKASIR_API_KEY);
+        params.append('project_id', process.env.PAKASIR_PROJECT_ID);
+        params.append('amount', price);
+        params.append('order_id', orderId);
+        params.append('description', `Beli ${product}`);
+        params.append('payment_method', 'qris');
+        params.append('customer_name', username);
+        params.append('customer_email', email);
+        params.append('customer_phone', whatsapp);
+
+        // 4. KIRIM FETCH
         const pakasirReq = await fetch('https://pakasir.com/api/create-transaction', {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json' 
+                'Content-Type': 'application/x-www-form-urlencoded' // <--- INI KUNCINYA
             },
-            body: JSON.stringify(payload)
+            body: params // Kirim params, bukan JSON.stringify
         });
 
         const pakasirRes = await pakasirReq.json();
 
-        // 4. Validasi Respon Pakasir
+        // 5. Cek Respon
         if (!pakasirRes.success && !pakasirRes.data?.qr_string && !pakasirRes.qr_string) {
-            console.error("Pakasir Failed:", JSON.stringify(pakasirRes));
-            const msg = pakasirRes.message || "Gagal membuat QRIS (Cek Config)";
-            return res.status(500).json({ error: msg });
+            console.error("Pakasir Gagal:", JSON.stringify(pakasirRes));
+            return res.status(500).json({ error: 'Gagal generate QRIS. Cek API Key.' });
         }
 
         const qrString = pakasirRes.data ? pakasirRes.data.qr_string : pakasirRes.qr_string;
 
-        // 5. Simpan Order ke Firebase
-        // Kita simpan username ASLI inputan user dulu. 
-        // Nanti Webhook yang akan mengupdate ini jika berubah jadi 'caspertes80'
+        // 6. Simpan ke Firebase
         await db.collection('orders').doc(orderId).set({
             order_id: orderId,
             username, email, password, whatsapp,
@@ -60,7 +57,7 @@ export default async function handler(req, res) {
             createdAt: new Date().toISOString()
         });
 
-        // 6. Sukses
+        // 7. Sukses
         return res.status(200).json({
             success: true,
             order_id: orderId,
@@ -68,7 +65,7 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error("Create Payment Error:", error);
+        console.error("System Error:", error);
         return res.status(500).json({ error: 'System Error: ' + error.message });
     }
 }
