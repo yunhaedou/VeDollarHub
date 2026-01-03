@@ -1,58 +1,63 @@
-import axios from 'axios';
 import { PTERO_CONFIG } from '../config.js';
 
-const api = axios.create({
-    baseURL: PTERO_CONFIG.domain,
-    headers: {
-        'Authorization': `Bearer ${PTERO_CONFIG.apiKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    }
-});
+// Helper Fetch Wrapper
+async function pteroFetch(endpoint, method = 'GET', body = null) {
+    const url = `${PTERO_CONFIG.domain}${endpoint}`;
+    const options = {
+        method,
+        headers: {
+            'Authorization': `Bearer ${PTERO_CONFIG.apiKey}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    };
+    if (body) options.body = JSON.stringify(body);
 
-async function getEggDetails(nestId, eggId) {
-    try {
-        const res = await api.get(`/api/application/nests/${nestId}/eggs/${eggId}`);
-        return res.data.attributes;
-    } catch (error) {
-        throw new Error("Gagal fetch Egg: " + error.message);
+    const req = await fetch(url, options);
+    const res = await req.json();
+
+    if (!req.ok) {
+        // Coba baca error message dari Ptero
+        const errMsg = res.errors ? res.errors[0].detail : "Unknown Ptero Error";
+        throw new Error(errMsg);
     }
+    return res;
 }
 
-// FUNGSI CEK KETERSEDIAAN (Untuk Create Payment)
+// Helper Get Egg
+async function getEggDetails(nestId, eggId) {
+    const res = await pteroFetch(`/api/application/nests/${nestId}/eggs/${eggId}`);
+    return res.attributes;
+}
+
+// 1. CEK KETERSEDIAAN (Dipakai create-payment.js)
 export async function checkPteroAvailability(username, email) {
     try {
-        // Cek Username
-        const userCheck = await api.get(`/api/application/users?filter[username]=${username}`);
-        if (userCheck.data.data.length > 0) {
-            return "Username sudah dipakai! Hapus user lama atau ganti nama.";
-        }
-        // Cek Email
-        const emailCheck = await api.get(`/api/application/users?filter[email]=${email}`);
-        if (emailCheck.data.data.length > 0) {
-            return "Email sudah terdaftar! Gunakan email lain.";
-        }
-        return null; 
+        const userCheck = await pteroFetch(`/api/application/users?filter[username]=${username}`);
+        if (userCheck.data.length > 0) return "Username sudah dipakai! Ganti yang lain.";
+
+        const emailCheck = await pteroFetch(`/api/application/users?filter[email]=${email}`);
+        if (emailCheck.data.length > 0) return "Email sudah terdaftar!";
+        
+        return null;
     } catch (error) {
-        console.error("Skip Ptero Check (Error):", error.message);
-        return null; // Skip cek jika error koneksi, lanjut bayar
+        console.error("Skip Ptero Check:", error.message);
+        return null; 
     }
 }
 
-// FUNGSI BUAT USER (PERSIS INPUT, NO RANDOM)
+// 2. BUAT USER (Persis Input)
 export async function ensurePteroUser(userData) {
-    // 1. Cek dulu (Safety)
-    const search = await api.get(`/api/application/users?filter[email]=${userData.email}`);
-    if (search.data.data.length > 0) {
-        return search.data.data[0].attributes.id;
-    }
+    // Cek dulu
+    const search = await pteroFetch(`/api/application/users?filter[email]=${userData.email}`);
+    if (search.data.length > 0) return search.data[0].attributes.id;
 
-    // 2. Bersihkan username dari spasi tapi JANGAN tambah angka
+    // Bersihkan username (Hanya huruf angka, tanpa spasi, TANPA ANGKA ACAK)
     const cleanUsername = userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 
-    const newUser = await api.post('/api/application/users', {
+    const newUser = await pteroFetch('/api/application/users', 'POST', {
         email: userData.email,
-        username: cleanUsername, 
+        username: cleanUsername,
         first_name: userData.username,
         last_name: "(Customer)",
         password: userData.password,
@@ -60,9 +65,10 @@ export async function ensurePteroUser(userData) {
         language: "en"
     });
 
-    return newUser.data.attributes.id;
+    return newUser.attributes.id;
 }
 
+// 3. BUAT SERVER
 export async function createPteroServer(userId, productType, resources) {
     const config = PTERO_CONFIG.games[productType];
     if (!config) throw new Error("Tipe game tidak dikenali");
@@ -90,11 +96,7 @@ export async function createPteroServer(userId, productType, resources) {
             io: 500,
             cpu: parseInt(resources.cpu)
         },
-        feature_limits: {
-            databases: 1,
-            backups: 0,
-            allocations: 1
-        },
+        feature_limits: { databases: 1, backups: 0, allocations: 1 },
         deploy: {
             locations: [PTERO_CONFIG.locationId],
             dedicated_ip: false,
@@ -102,6 +104,6 @@ export async function createPteroServer(userId, productType, resources) {
         }
     };
 
-    const res = await api.post('/api/application/servers', payload);
-    return res.data.attributes;
+    const res = await pteroFetch('/api/application/servers', 'POST', payload);
+    return res.attributes;
 }
