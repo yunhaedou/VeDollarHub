@@ -1,6 +1,6 @@
 import { PTERO_CONFIG } from '../config.js';
 
-// Helper Fetch Wrapper
+// Helper Fetch
 async function pteroFetch(endpoint, method = 'GET', body = null) {
     const url = `${PTERO_CONFIG.domain}${endpoint}`;
     const options = {
@@ -17,83 +17,35 @@ async function pteroFetch(endpoint, method = 'GET', body = null) {
     const res = await req.json();
 
     if (!req.ok) {
-        // Log Error Detail dari Ptero agar ketahuan salahnya dimana
-        console.error("PTERO API ERROR:", JSON.stringify(res));
-        const errMsg = res.errors ? res.errors[0].detail : "Unknown Ptero Error";
-        throw new Error(errMsg);
+        const detail = res.errors ? res.errors[0].detail : JSON.stringify(res);
+        console.error("PTERO API ERROR:", detail);
+        // Jangan throw error agar logic lain tetap jalan, return null saja
+        return null; 
     }
     return res;
 }
 
-// Helper Get Egg
 async function getEggDetails(nestId, eggId) {
     const res = await pteroFetch(`/api/application/nests/${nestId}/eggs/${eggId}`);
-    return res.attributes;
+    return res ? res.attributes : null;
 }
 
-// [BARU] Helper Generator Environment Variable
-function getEnvironment(type) {
-    const base = { "VERSION": "latest" };
-
-    // 1. MINECRAFT (Paper/Spigot)
-    if (type === 'mc') {
-        return { 
-            ...base, 
-            "SERVER_JARFILE": "server.jar", 
-            "MINECRAFT_VERSION": "latest",
-            "BUILD_NUMBER": "latest",
-            "DL_PATH": "" 
-        };
-    }
-    
-    // 2. SAMP (GTA San Andreas)
-    if (type === 'samp') {
-        return { 
-            ...base, 
-            "MAX_PLAYERS": "50", 
-            "RCON_PASSWORD": "changeme123", // Password RCON Default
-            "PORT": "7777"
-        };
-    }
-
-    // 3. BOT (WhatsApp / Telegram - NodeJS)
-    if (type === 'botwa' || type === 'bottg') {
-        return { 
-            ...base, 
-            "MAIN_FILE": "index.js", 
-            "USR_UPLOAD": "0", 
-            "AUTO_UPDATE": "0" 
-        };
-    }
-
-    return base;
-}
-
-// 1. CEK KETERSEDIAAN (Hanya Cek Email)
-export async function checkPteroAvailability(username, email) {
-    try {
-        const emailCheck = await pteroFetch(`/api/application/users?filter[email]=${email}`);
-        if (emailCheck.data.length > 0) return "Email sudah terdaftar! Gunakan email lain.";
-        return null; 
-    } catch (error) {
-        return null; 
-    }
-}
-
-// 2. BUAT USER (Return Username Final)
+// 1. BUAT/CEK USER
 export async function ensurePteroUser(userData) {
     // Cek User Lama
     const search = await pteroFetch(`/api/application/users?filter[email]=${userData.email}`);
-    if (search.data.length > 0) {
+    if (search && search.data.length > 0) {
         return {
             id: search.data[0].attributes.id,
-            username: search.data[0].attributes.username
+            username: search.data[0].attributes.username,
+            exists: true // Penanda user lama
         };
     }
 
-    // Buat User Baru (Dengan Randomizer jika perlu)
-    const randomSuffix = Math.floor(Math.random() * 100);
-    const finalUsername = userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + randomSuffix;
+    // Buat User Baru
+    const cleanUser = userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 10);
+    const randomSuffix = Math.floor(Math.random() * 1000);
+    const finalUsername = `${cleanUser}${randomSuffix}`;
 
     const newUser = await pteroFetch('/api/application/users', 'POST', {
         email: userData.email,
@@ -105,22 +57,48 @@ export async function ensurePteroUser(userData) {
         language: "en"
     });
 
+    if(!newUser) throw new Error("Gagal membuat user Ptero.");
+
     return {
         id: newUser.attributes.id,
-        username: newUser.attributes.username
+        username: newUser.attributes.username,
+        exists: false
     };
 }
 
-// 3. BUAT SERVER (FIX ENVIRONMENT)
+// 2. CEK APAKAH USER SUDAH PUNYA SERVER? (Untuk Renew)
+export async function getUserServer(userId) {
+    // Ambil daftar server milik user ini
+    const res = await pteroFetch(`/api/application/users/${userId}?include=servers`);
+    if(res && res.attributes.relationships.servers.data.length > 0) {
+        // Ambil server pertama
+        return res.attributes.relationships.servers.data[0].attributes;
+    }
+    return null;
+}
+
+// 3. SUSPEND / UNSUSPEND SERVER
+export async function setServerStatus(serverId, action) {
+    // action: 'suspend' atau 'unsuspend'
+    await pteroFetch(`/api/application/servers/${serverId}/${action}`, 'POST');
+}
+
+// 4. BUAT SERVER BARU
 export async function createPteroServer(userId, productType, resources) {
-    // Pastikan CONFIG user benar
     const config = PTERO_CONFIG.games[productType];
-    if (!config) throw new Error(`Game Type '${productType}' tidak ditemukan di api/config.js`);
+    if (!config) throw new Error(`Tipe '${productType}' tidak ditemukan di Config.`);
 
     const eggData = await getEggDetails(config.nestId, config.eggId);
+    if(!eggData) throw new Error("Gagal mengambil data Egg Pterodactyl.");
 
-    // Ambil Environment yang sesuai kategori
-    const envVars = getEnvironment(productType);
+    const envVars = {
+        "MATCH": "git", 
+        "USER_UPLOAD": "0",
+        "AUTO_UPDATE": "0",
+        "MAIN_FILE": "index.js", 
+        "BOT_JS_FILE": "index.js", 
+        "STARTUP": eggData.startup
+    };
 
     const payload = {
         name: `${productType.toUpperCase()} - User ${userId}`,
@@ -128,7 +106,7 @@ export async function createPteroServer(userId, productType, resources) {
         egg: config.eggId,
         docker_image: eggData.docker_image,
         startup: eggData.startup,
-        environment: envVars, // <--- INI PERBAIKANNYA
+        environment: envVars, 
         limits: {
             memory: parseInt(resources.ram),
             swap: 0,
@@ -145,5 +123,6 @@ export async function createPteroServer(userId, productType, resources) {
     };
 
     const res = await pteroFetch('/api/application/servers', 'POST', payload);
+    if(!res) throw new Error("Gagal request create server ke Ptero.");
     return res.attributes;
 }
