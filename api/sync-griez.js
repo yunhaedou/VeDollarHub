@@ -1,12 +1,13 @@
+import { db } from './utils/firebase.js';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
     const GRIEZ_API_ID = process.env.GRIEZ_API_ID;
     const GRIEZ_API_KEY = process.env.GRIEZ_API_KEY;
-    const URL_SERVICE = "https://griezstore.id/api/service";
+    const URL_SERVICE = "https://griezstore.id/api/service"; //
 
     if (!GRIEZ_API_ID || !GRIEZ_API_KEY) {
-        return res.status(500).json({ error: "API Key belum disetting" });
+        return res.status(500).json({ error: "API Key Griez belum disetting di Vercel" });
     }
 
     try {
@@ -15,59 +16,94 @@ export default async function handler(req, res) {
         const payload = new URLSearchParams();
         payload.append('api_id', GRIEZ_API_ID);
         payload.append('api_key', GRIEZ_API_KEY);
-        payload.append('signature', sign);
+        payload.append('signature', sign); 
         payload.append('status', 'active');
 
         const reqGriez = await fetch(URL_SERVICE, { method: 'POST', body: payload });
         const resGriez = await reqGriez.json();
 
-        // CEK 1: Apakah Griez menolak koneksi?
         if (!resGriez.status || !resGriez.data) {
-            return res.status(500).json({ 
-                error: "Gagal ambil data Griez", 
-                respon_asli: resGriez 
-            });
+            return res.status(500).json({ error: "Gagal Login Griez", detail: resGriez });
         }
 
-        // CEK 2: Data ada, tapi kosong?
-        if (resGriez.data.length === 0) {
-            return res.status(200).json({ 
-                success: false, 
-                message: "GriezStore mengembalikan data kosong (0 produk)." 
-            });
-        }
-
-        // CEK 3: AMBIL SAMPEL KATEGORI & NAMA (DETEKTIF MODE)
-        // Kita ambil semua nama kategori unik untuk dilihat
-        const categoriesFound = new Set();
-        const sampleProducts = [];
-
-        // Ambil 10 produk pertama sebagai contoh
-        for (let i = 0; i < Math.min(resGriez.data.length, 10); i++) {
-            const item = resGriez.data[i];
-            categoriesFound.add(item.kategori); // Catat kategorinya
-            sampleProducts.push({
-                nama: item.nama_layanan,
-                kategori: item.kategori,
-                id: item.id
-            });
-        }
+        const batch = db.batch();
+        let count = 0;
+        let batchCount = 0;
         
-        // Loop semua data cuma buat catat kategori unik lainnya
-        resGriez.data.forEach(item => {
-            if(item.kategori) categoriesFound.add(item.kategori);
-        });
+        // Simpan semua kategori yang ditemukan untuk laporan jika 0 produk tersimpan
+        const categoriesFound = new Set();
 
-        // TAMPILKAN HASILNYA KE LAYAR
-        return res.status(200).json({
-            success: true,
-            message: "MODE DEBUG: Lihat data di bawah ini untuk memperbaiki filter.",
-            total_produk_griez: resGriez.data.length,
-            daftar_kategori_ditemukan: Array.from(categoriesFound), // <--- INI YG KITA CARI
-            contoh_produk: sampleProducts
+        for (const item of resGriez.data) {
+            if (!item.id) continue; // Skip item rusak
+
+            // Data Asli
+            const name = (item.nama_layanan || "").toLowerCase();
+            const categoryName = (item.kategori || "").toLowerCase();
+            const priceAsli = parseInt(item.harga);
+            const serviceId = item.id;
+
+            // Catat kategori untuk debug (Biar ketahuan namanya apa)
+            if(item.kategori) categoriesFound.add(item.kategori);
+
+            let myCategory = "";
+
+            // --- FILTER YANG LEBIH LUAS ---
+            
+            // 1. Weekly Diamond (Cek berbagai kemungkinan nama)
+            if (name.includes("weekly") || name.includes("mingguan") || name.includes("wdp")) {
+                if (name.includes("brazil") || name.includes("br")) myCategory = "wd_br";
+                else myCategory = "wd_id";
+            }
+            // 2. Mobile Legends (Cek MLBB, Mobile Legend, Legends, dll)
+            else if (categoryName.includes("mobile") || categoryName.includes("mlbb") || categoryName.includes("legend") || name.includes("mobile legend")) {
+                // Filter lagi: Jangan ambil game lain yg ada kata 'mobile' (misal COD Mobile)
+                if (name.includes("call of duty") || categoryName.includes("cod")) {
+                    // Skip CODM
+                } else {
+                    if (name.includes("brazil") || name.includes("br")) myCategory = "mlbb_br";
+                    else myCategory = "mlbb";
+                }
+            }
+
+            // Jika Kategori Cocok -> Simpan
+            if (myCategory) {
+                const sellingPrice = priceAsli + 1500; // Markup
+                const docRef = db.collection('products').doc(String(serviceId));
+                
+                batch.set(docRef, {
+                    name: item.nama_layanan,
+                    price: sellingPrice,
+                    price_raw: sellingPrice,
+                    category: myCategory,
+                    service_code: serviceId,
+                    provider: "griez",
+                    description: "Proses Otomatis"
+                });
+
+                count++;
+                batchCount++;
+                if (batchCount >= 400) { await batch.commit(); batchCount = 0; }
+            }
+        }
+
+        if (batchCount > 0) await batch.commit();
+
+        // --- RESPON PINTAR ---
+        // Jika 0 produk, kita kirim daftar kategori di pesan Error agar muncul di HP Anda
+        if (count === 0) {
+            const listCat = Array.from(categoriesFound).join(", ");
+            return res.status(200).json({ 
+                success: false, // Bikin false biar muncul toast merah
+                error: `0 Produk tersimpan. Kategori yang terbaca di Griez: [${listCat}]. Silakan infokan kategori ini ke saya.` 
+            });
+        }
+
+        return res.status(200).json({ 
+            success: true, 
+            message: `Sukses! ${count} produk Mobile Legends & Weekly berhasil diambil.` 
         });
 
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: "Server Error: " + error.message });
     }
-}
+                    }
