@@ -47,6 +47,7 @@
         .price-info p { font-size: 11px; color: var(--text-muted); }
         .price-tag { font-weight: bold; color: var(--secondary); font-size: 14px; }
         .btn-glow { width: 100%; background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-bottom: 20px; transition: 0.4s; }
+        .btn-glow:hover { background: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
         .btn-checkout { width: 100%; padding: 16px; background: var(--accent-gradient); border: none; border-radius: 15px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); display: flex; justify-content: center; align-items: center; gap: 10px; }
         .btn-checkout:disabled { opacity: 0.7; cursor: not-allowed; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
@@ -64,12 +65,6 @@
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        /* CSS KHUSUS CHECK NICKNAME */
-        .check-nick-box { margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px dashed #64748b; display: none; }
-        .btn-check-nick { background: #334155; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 11px; margin-top: 5px; }
-        .btn-check-nick:hover { background: #475569; }
-        .nick-result { font-weight: bold; color: #4ade80; margin-top: 5px; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -95,7 +90,7 @@
 
         <div class="banner-container" data-aos="zoom-in">
             <img src="https://via.placeholder.com/1080x1920/1e293b/ffffff?text=Bot+WhatsApp+24/7" class="banner-slide active">
-            <img src="https://via.placeholder.com/1080x1920/3b0764/ffffff?text=TopUp+MLBB+Murah" class="banner-slide">
+            <img src="https://via.placeholder.com/1080x1920/3b0764/ffffff?text=App+Premium+Murah" class="banner-slide">
             <div class="banner-overlay"><h3>VeDollar Hub</h3><p>Solusi Digital Terbaik</p></div>
         </div>
 
@@ -103,27 +98,17 @@
             <button class="cat-btn active" onclick="switchCategory('botwa')"><i class="fab fa-whatsapp"></i> Bot WA</button>
             <button class="cat-btn" onclick="switchCategory('bottg')"><i class="fab fa-telegram"></i> Bot Telegram</button>
             
-            <button class="cat-btn" onclick="switchCategory('mlbb')"><i class="fas fa-mobile-alt"></i> MLBB ID</button>
-            <button class="cat-btn" onclick="switchCategory('mlbb_br')"><i class="fas fa-globe-americas"></i> MLBB Brazil</button>
-            <button class="cat-btn" onclick="switchCategory('wd_id')"><i class="fas fa-gem"></i> Weekly ID</button>
-            <button class="cat-btn" onclick="switchCategory('wd_br')"><i class="fas fa-gem"></i> Weekly Brazil</button>
+            <button class="cat-btn" onclick="switchCategory('vps')"><i class="fas fa-server"></i> VPS Manual</button>
+
+            <button class="cat-btn" onclick="switchCategory('app')"><i class="fas fa-cube"></i> App Premium</button>
         </div>
 
         <div class="glass-card" data-aos="fade-up" data-aos-delay="100">
-            <h3 style="margin-bottom: 20px; border-left: 4px solid var(--secondary); padding-left: 10px;">1. Data Tujuan</h3>
+            <h3 style="margin-bottom: 20px; border-left: 4px solid var(--secondary); padding-left: 10px;">1. Data Pembeli</h3>
             
             <div class="form-group">
-                <label id="lblUsername">Username (Untuk Login Panel)</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="inpUsername" class="input-field" placeholder="Masukkan Username..." style="flex: 2;">
-                    
-                    <input type="number" id="inpZone" class="input-field" placeholder="Zone ID" style="flex: 1; display: none;">
-                </div>
-
-                <div id="checkNickArea" class="check-nick-box">
-                    <button class="btn-check-nick" onclick="checkNickname()"><i class="fas fa-search"></i> Cek Nickname</button>
-                    <div id="nickResult" class="nick-result"></div>
-                </div>
+                <label id="lblUsername">Username / Nama</label>
+                <input type="text" id="inpUsername" class="input-field" placeholder="Masukkan Username...">
             </div>
 
             <div class="form-group" id="groupPass">
@@ -170,7 +155,7 @@
         <div class="modal-content">
             <span class="close-modal" id="btnCloseServerModal" style="display: none;" onclick="window.location.reload()">&times;</span>
             <h3 style="color: var(--success); margin-bottom: 5px;">Transaksi Sukses!</h3>
-            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Pesanan sedang diproses.</p>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Simpan data berikut ini:</p>
 
             <div class="server-details-box" id="hostingDetails" style="display:none;">
                 <div class="copy-group"><div><span class="copy-label">Panel URL</span><span class="copy-val" id="resUrl">...</span></div></div>
@@ -178,10 +163,9 @@
                 <div class="copy-group"><div><span class="copy-label">Password</span><span class="copy-val" id="resPass">...</span></div></div>
             </div>
             
-            <div class="server-details-box" id="topupDetails" style="display:none;">
-                <p style="color:#fff; font-size:13px;">Target Akun:</p>
-                <b id="resTarget" style="color:var(--primary); font-size:16px; display:block; margin:10px 0;">...</b>
-                <p style="color:#94a3b8; font-size:11px;">Status: <span style="color:#4ade80">Sukses</span></p>
+            <div class="server-details-box" id="appDetails" style="display:none;">
+                <p style="color:#fff; font-size:13px; margin-bottom:5px;">Akun Premium Anda:</p>
+                <div style="background:#0f172a; padding:10px; border-radius:8px; border:1px dashed #4ade80; color:#4ade80; font-family:monospace; word-break:break-all;" id="resAccount">...</div>
             </div>
 
             <p class="timer-warning" id="timerText">Tunggu sebentar...</p>
@@ -209,152 +193,140 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- KONFIGURASI ADMIN ---
+        const ADMIN_WA = "6285123456789"; // Nomor WA Admin untuk VPS
+
         window.currentCategory = 'botwa';
         window.selectedProductData = null;
-        window.validatedNickname = null; // Simpan nick yg sudah dicek
 
         // --- GANTI KATEGORI ---
         window.switchCategory = (catId) => {
             window.currentCategory = catId;
+            window.selectedProductData = null; // Reset pilihan
+            
+            // UI Button Active
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
+
             renderProducts(catId);
 
+            const grpPass = document.getElementById('groupPass');
             const lblUser = document.getElementById('lblUsername');
             const inpUser = document.getElementById('inpUsername');
-            const inpZone = document.getElementById('inpZone');
-            const grpPass = document.getElementById('groupPass');
-            const checkArea = document.getElementById('checkNickArea');
 
-            // Jika Kategori Hosting (Bot WA/TG)
+            // Logic Tampilan Form
             if (['botwa', 'bottg'].includes(catId)) {
+                // Hosting: Butuh Pass
                 lblUser.innerText = "Username (Untuk Login Panel)";
                 inpUser.placeholder = "Tanpa spasi, contoh: udin123";
-                inpZone.style.display = "none";     // Hide Zone
-                checkArea.style.display = "none";   // Hide Cek Nick
-                grpPass.style.display = "block";    // Show Pass
-                window.validatedNickname = null;
-            } 
-            // Jika Kategori Topup (MLBB)
-            else {
-                lblUser.innerText = "User ID & Server";
-                inpUser.placeholder = "User ID (Contoh: 123456)";
-                inpZone.style.display = "block";    // Show Zone
-                checkArea.style.display = "block";  // Show Cek Nick
-                grpPass.style.display = "none";     // Hide Pass
-                document.getElementById('nickResult').innerHTML = ""; // Reset Nick
+                grpPass.style.display = "block";
+            } else {
+                // VPS & App: Tidak butuh Pass Panel
+                lblUser.innerText = "Nama Anda";
+                inpUser.placeholder = "Nama Lengkap...";
+                grpPass.style.display = "none";
             }
         }
 
         async function renderProducts(cat) {
             const container = document.getElementById('pricelist-container');
-            container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>';
+            container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3><div style="text-align: center;"><i class="fas fa-circle-notch fa-spin"></i> Memuat...</div>';
+            
             try {
                 const q = query(collection(db, "products"), where("category", "==", cat));
                 const querySnapshot = await getDocs(q);
+
+                container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>';
+
                 if (querySnapshot.empty) {
                     container.innerHTML += `<p style="text-align:center; color:#64748b; padding:20px;">Produk Kosong.</p>`;
                 } else {
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
+                    querySnapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
                         const card = document.createElement('div');
-                        card.className = 'price-card';
-                        let desc = data.description || (['botwa','bottg'].includes(cat) ? "Active 30 Days" : "Proses Instan");
-                        card.innerHTML = `<div class="price-info"><h4>${data.name}</h4><p>${desc}</p></div><div class="price-tag">Rp ${data.price}</div>`;
-                        card.onclick = function() {
-                            document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
-                            card.classList.add('selected');
-                            window.selectedProductData = { ...data, category: cat };
-                        };
+                        card.className = 'price-card'; // Gunakan style price-card yg sudah ada
+                        
+                        // Cek Stok untuk App Premium
+                        let stockBadge = "";
+                        let isHabis = false;
+
+                        if (cat === 'app') {
+                            const count = data.stock ? data.stock.length : 0;
+                            if(count > 0) stockBadge = `<span style="background:#4ade80; color:black; font-size:10px; padding:2px 6px; border-radius:4px; margin-left:5px;">Sisa ${count}</span>`;
+                            else {
+                                stockBadge = `<span style="background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:4px; margin-left:5px;">HABIS</span>`;
+                                isHabis = true;
+                            }
+                        }
+
+                        let desc = data.description || (['botwa','bottg'].includes(cat) ? "Active 30 Days" : "Layanan Terbaik");
+
+                        card.innerHTML = `
+                            <div class="price-info">
+                                <h4>${data.name} ${stockBadge}</h4>
+                                <p>${desc}</p>
+                            </div>
+                            <div class="price-tag">Rp ${data.price}</div>
+                        `;
+                        
+                        if (!isHabis) {
+                            card.onclick = function() {
+                                document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
+                                card.classList.add('selected');
+                                // PENTING: Simpan doc.id agar bisa update stok di backend
+                                window.selectedProductData = { id: docSnap.id, ...data, category: cat };
+                            };
+                        } else {
+                            card.style.opacity = "0.6";
+                            card.style.cursor = "not-allowed";
+                        }
                         container.appendChild(card);
                     });
                 }
             } catch (error) { console.error(error); }
         }
+        
         renderProducts('botwa');
-
-        // --- CEK NICKNAME ---
-        window.checkNickname = async function() {
-            const userId = document.getElementById('inpUsername').value;
-            const zoneId = document.getElementById('inpZone').value;
-            const resultBox = document.getElementById('nickResult');
-
-            if(!userId || !zoneId) {
-                resultBox.innerHTML = "<span style='color:red;'>Isi ID dan Zone dulu!</span>";
-                return;
-            }
-
-            resultBox.innerHTML = "<em>Mengecek...</em>";
-
-            try {
-                // Panggil API Backend check-nickname.js
-                const res = await fetch('/api/check-nickname', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        game: window.currentCategory,
-                        id: userId,
-                        zone: zoneId
-                    })
-                });
-                const data = await res.json();
-
-                if(data.success) {
-                    resultBox.innerHTML = `Nick: ${data.nickname}`;
-                    window.validatedNickname = data.nickname; // Simpan agar bisa dipakai saat checkout
-                } else {
-                    resultBox.innerHTML = `<span style='color:red;'>${data.error || "Tidak ditemukan"}</span>`;
-                    window.validatedNickname = null;
-                }
-            } catch (e) {
-                resultBox.innerHTML = "<span style='color:red;'>Gagal cek server.</span>";
-            }
-        }
 
         // --- CHECKOUT ---
         window.processCheckout = async function() {
             const btn = document.querySelector('.btn-checkout');
             const username = document.getElementById('inpUsername').value;
-            const zoneId = document.getElementById('inpZone').value;
             const wa = document.getElementById('inpWa').value;
             const email = document.getElementById('inpEmail').value;
             let password = document.getElementById('inpPass').value;
 
-            // Validasi Hosting
-            if (['botwa', 'bottg'].includes(window.currentCategory)) {
-                if(!username || !wa || !email || !password) return showToast("Lengkapi data!", "error");
-            } 
-            // Validasi Topup
-            else {
-                if(!username || !zoneId || !wa || !email) return showToast("Lengkapi ID & Zone!", "error");
-                password = "topup-user"; 
-                // Opsional: Paksa cek nick dulu?
-                // if(!window.validatedNickname) return showToast("Cek Nickname dulu!", "error");
+            // Validasi Umum
+            if(!username || !wa || !email) return showToast("Lengkapi data diri!", "error");
+            if(!window.selectedProductData) return showToast("Pilih paket dulu!", "error");
+
+            // --- JIKA VPS (MANUAL VIA WA) ---
+            if (window.currentCategory === 'vps') {
+                const msg = `Halo Admin, saya mau order VPS Manual.\n\nProduk: ${window.selectedProductData.name}\nHarga: Rp ${window.selectedProductData.price}\n\nNama: ${username}\nEmail: ${email}\nWA: ${wa}`;
+                window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`, '_blank');
+                return;
             }
 
-            if(!window.selectedProductData) return showToast("Pilih paket dulu!", "error");
+            // --- JIKA OTOMATIS (BOT / APP) ---
+            // Cek Pass Panel
+            if (['botwa', 'bottg'].includes(window.currentCategory) && !password) {
+                return showToast("Password Panel wajib diisi!", "error");
+            }
+            if (window.currentCategory === 'app') password = "manual-process"; // Dummy pass
 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
-
-            // Jika Topup, gabungkan ID dan Zone untuk dikirim ke Backend/Griez
-            // Format Griez biasanya ID(ZONE) atau IDZONE tergantung game
-            // Kita kirim ID murni, nanti backend yg format.
-            // Tapi untuk disimpan di firebase username, kita gabung jadi satu string.
-            let finalUsername = username;
-            if (zoneId) finalUsername = `${username} (${zoneId})`;
 
             try {
                 const response = await fetch('/api/create-payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: finalUsername, // User ID + Zone
-                        email, password, whatsapp: wa,
+                        username, email, password, whatsapp: wa,
                         product: window.selectedProductData.name,
                         price: window.selectedProductData.price.replace(/\D/g,''),
                         category: window.selectedProductData.category,
-                        service_code: window.selectedProductData.service_code || "" 
+                        productId: window.selectedProductData.id // ID untuk kurangi stok
                     })
                 });
 
@@ -362,14 +334,17 @@
 
                 if (result.success && result.qris_content) {
                     showToast("Order Dibuat! Silakan Scan.", "success");
+                    
                     const qrContainer = document.getElementById('qrCodePlace');
                     const qrImageUrl = `https://quickchart.io/qr?text=${encodeURIComponent(result.qris_content)}&size=300&ecLevel=L&margin=1`;
                     qrContainer.innerHTML = `<img src="${qrImageUrl}" style="width:100%; max-width:280px; border-radius:8px; display:block; margin:0 auto;" alt="QRIS Code">`;
+
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
                     document.getElementById('qrisModal').style.display = "flex";
                     btn.innerHTML = 'BAYAR SEKARANG';
                     btn.disabled = false;
 
+                    // LISTENER FIREBASE
                     const orderDocRef = doc(db, "orders", result.order_id);
                     const unsubscribe = onSnapshot(orderDocRef, (docSnap) => {
                         if (docSnap.exists()) {
@@ -378,20 +353,20 @@
                                 document.getElementById('qrisModal').style.display = "none";
                                 document.getElementById('serverDetailModal').style.display = 'flex';
                                 
-                                if (['botwa', 'bottg'].includes(data.category)) {
+                                // TAMPILAN HASIL (PANEL vs APP)
+                                if (window.currentCategory === 'app') {
+                                    document.getElementById('hostingDetails').style.display = 'none';
+                                    document.getElementById('appDetails').style.display = 'block';
+                                    document.getElementById('resAccount').innerText = data.delivered_account || "Sedang diproses...";
+                                } else {
                                     document.getElementById('hostingDetails').style.display = 'block';
-                                    document.getElementById('topupDetails').style.display = 'none';
+                                    document.getElementById('appDetails').style.display = 'none';
                                     document.getElementById('resUrl').innerText = data.panel_url || "...";
                                     document.getElementById('resUser').innerText = data.username;
                                     document.getElementById('resPass').innerText = data.password;
-                                } else {
-                                    document.getElementById('hostingDetails').style.display = 'none';
-                                    document.getElementById('topupDetails').style.display = 'block';
-                                    // Tampilkan Nickname jika ada, kalau tidak ya ID-nya
-                                    const showName = window.validatedNickname ? `${data.username} (${window.validatedNickname})` : data.username;
-                                    document.getElementById('resTarget').innerText = showName;
                                 }
 
+                                // Timer Close
                                 let timeLeft = 5;
                                 const timerText = document.getElementById('timerText');
                                 const closeBtn = document.getElementById('btnCloseServerModal');
@@ -408,6 +383,7 @@
                             }
                         }
                     });
+
                 } else {
                     showToast("Gagal: " + (result.error), "error");
                     btn.disabled = false; btn.innerHTML = 'BAYAR SEKARANG';
