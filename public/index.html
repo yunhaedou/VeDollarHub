@@ -15,113 +15,64 @@
         :root {
             --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.7); --glass-border: 1px solid rgba(255, 255, 255, 0.1);
             --primary: #6366f1; --secondary: #a855f7; --text-main: #f8fafc; --text-muted: #94a3b8;
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --success: #22c55e;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --success: #22c55e;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
         body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
-
-        /* --- BACKGROUND PARTICLES --- */
         #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
-
-        /* --- CONTAINER --- */
         .container { max-width: 600px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; padding-bottom: 80px; }
-
-        /* --- HEADER --- */
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; margin-bottom: 20px; animation: slideDown 1s ease; }
         .logo-area h2 { color: #fff; font-weight: 700; letter-spacing: 1px; font-size: 24px; }
         .menu-btn { font-size: 24px; cursor: pointer; transition: 0.3s; color: var(--text-main); }
-        .menu-btn:active { transform: scale(0.9); }
-
-        /* --- SIDEBAR --- */
-        .sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px; border-left: var(--glass-border); display: flex; flex-direction: column; }
+        .sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); z-index: 1000; transition: 0.4s; padding: 30px; border-left: var(--glass-border); display: flex; flex-direction: column; }
         .sidebar.active { right: 0; }
         .sidebar-links a { display: flex; align-items: center; color: var(--text-main); text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 10px; transition: 0.3s; background: rgba(255,255,255,0.03); }
-        .sidebar-links a:hover { background: var(--accent-gradient); transform: translateX(-5px); }
-        .sidebar-links i { margin-right: 15px; width: 20px; text-align: center; }
-
-        /* --- BANNER (9:16) --- */
         .banner-container { width: 100%; aspect-ratio: 9/16; max-height: 500px; border-radius: 20px; overflow: hidden; position: relative; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: var(--glass-border); }
-        .banner-slide { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1s ease-in-out; transform: scale(1.05); animation: zoomEffect 20s infinite alternate; }
+        .banner-slide { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1s; }
         .banner-slide.active { opacity: 1; }
         .banner-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px 20px 20px; background: linear-gradient(to top, #0f172a 10%, transparent 100%); }
-
-        /* --- CATEGORIES --- */
         .category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; scrollbar-width: none; }
-        .category-scroll::-webkit-scrollbar { display: none; }
         .cat-btn { background: var(--glass-bg); border: var(--glass-border); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .cat-btn.active, .cat-btn:hover { background: var(--accent-gradient); color: #fff; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); transform: translateY(-2px); }
-
-        /* --- CARDS & FORMS --- */
-        .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: var(--glass-border); border-radius: 16px; padding: 25px; margin-bottom: 25px; transition: 0.3s; position: relative; overflow: hidden; }
+        .cat-btn.active, .cat-btn:hover { background: var(--accent-gradient); color: #fff; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: var(--glass-border); border-radius: 16px; padding: 25px; margin-bottom: 25px; transition: 0.3s; }
         .form-group { margin-bottom: 15px; }
         .form-group label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; display: block; }
         .input-field { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 14px; border-radius: 12px; color: #fff; outline: none; transition: 0.3s; }
         .input-field:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
-
-        /* --- PRICELIST --- */
         .price-category { display: none; animation: fadeIn 0.5s; }
         .price-category.active { display: block; }
-        .price-card { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid transparent; cursor: pointer; transition: 0.3s; position: relative; }
+        .price-card { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid transparent; cursor: pointer; transition: 0.3s; }
         .price-card:hover, .price-card.selected { border-color: var(--secondary); background: rgba(168, 85, 247, 0.1); }
-        .price-card.selected::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; right: 10px; top: 10px; color: var(--secondary); opacity: 0.5; }
         .price-info h4 { font-size: 15px; margin-bottom: 2px; color: #fff; }
         .price-info p { font-size: 11px; color: var(--text-muted); }
         .price-tag { font-weight: bold; color: var(--secondary); font-size: 14px; }
-
-        /* --- BUTTONS --- */
         .btn-glow { width: 100%; background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-bottom: 20px; transition: 0.4s; }
-        .btn-glow:hover { background: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
-        
         .btn-checkout { width: 100%; padding: 16px; background: var(--accent-gradient); border: none; border-radius: 15px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); display: flex; justify-content: center; align-items: center; gap: 10px; }
         .btn-checkout:disabled { opacity: 0.7; cursor: not-allowed; }
-        .btn-checkout:active { transform: scale(0.98); }
-
-        /* --- MODAL BASE --- */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-content { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--secondary); animation: popUp 0.4s; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); transition: 0.3s; }
-        .close-modal:hover { color: #fff; }
-
-        /* --- CSS POPUP DETAIL SERVER --- */
-        .server-details-box {
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            text-align: left;
-        }
-        .copy-group {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #0f172a; border: 1px solid #334155;
-            padding: 8px 12px; border-radius: 8px; margin-bottom: 10px;
-        }
+        .server-details-box { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 15px; margin: 15px 0; text-align: left; }
+        .copy-group { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; }
         .copy-label { font-size: 10px; color: #94a3b8; display: block; margin-bottom: 2px; }
         .copy-val { font-size: 13px; color: #fff; font-family: monospace; user-select: all; }
-        .btn-copy {
-            background: transparent; border: 1px solid var(--primary); color: var(--primary);
-            padding: 4px 10px; border-radius: 6px; cursor: pointer;
-            font-size: 11px; transition: 0.2s;
-        }
+        .btn-copy { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: 0.2s; }
         .btn-copy:hover { background: var(--primary); color: white; }
         .timer-warning { font-size: 11px; color: #f59e0b; margin-top: 5px; font-style: italic; }
-
-        /* CSS QRIS */
         .qr-frame { background: white; padding: 15px; border-radius: 10px; display: inline-block; margin: 20px 0; min-height: 250px; }
-
-        /* --- FOOTER --- */
         .footer { text-align: center; margin-top: 50px; padding: 20px; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); }
-
-        /* --- ANIMATIONS --- */
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes zoomEffect { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+        
+        /* CSS KHUSUS CHECK NICKNAME */
+        .check-nick-box { margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px dashed #64748b; display: none; }
+        .btn-check-nick { background: #334155; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 11px; margin-top: 5px; }
+        .btn-check-nick:hover { background: #475569; }
+        .nick-result { font-weight: bold; color: #4ade80; margin-top: 5px; font-size: 13px; }
     </style>
 </head>
 <body>
-
     <div id="particles-js"></div>
 
     <div class="sidebar" id="sidebar">
@@ -133,114 +84,84 @@
             <a href="#"><i class="fab fa-whatsapp"></i> Hubungi Admin</a>
             <a href="#"><i class="fas fa-history"></i> Cek Status Pesanan</a>
             <a href="admin.html"><i class="fas fa-user-shield"></i> Login Admin</a>
-            <a href="#"><i class="fas fa-info-circle"></i> Tentang Kami</a>
         </div>
     </div>
 
     <div class="container">
         <header>
-            <div class="logo-area">
-                <h2>VeDollar<span style="color:var(--primary)">Hub</span></h2>
-            </div>
+            <div class="logo-area"><h2>VeDollar<span style="color:var(--primary)">Hub</span></h2></div>
             <i class="fas fa-bars menu-btn" onclick="toggleSidebar()"></i>
         </header>
 
         <div class="banner-container" data-aos="zoom-in">
-            <img src="https://via.placeholder.com/1080x1920/1e293b/ffffff?text=Minecraft+Hosting+Murah" class="banner-slide active">
-            <img src="https://via.placeholder.com/1080x1920/3b0764/ffffff?text=Bot+WhatsApp+24/7" class="banner-slide">
-            <img src="https://via.placeholder.com/1080x1920/1e1b4b/ffffff?text=GTA+SAMP+Server" class="banner-slide">
-            
-            <div class="banner-overlay">
-                <h3>Hosting Otomatis</h3>
-                <p>Server langsung aktif detik ini juga!</p>
-            </div>
+            <img src="https://via.placeholder.com/1080x1920/1e293b/ffffff?text=Bot+WhatsApp+24/7" class="banner-slide active">
+            <img src="https://via.placeholder.com/1080x1920/3b0764/ffffff?text=TopUp+MLBB+Murah" class="banner-slide">
+            <div class="banner-overlay"><h3>VeDollar Hub</h3><p>Solusi Digital Terbaik</p></div>
         </div>
 
         <div class="category-scroll" data-aos="fade-right">
             <button class="cat-btn active" onclick="switchCategory('botwa')"><i class="fab fa-whatsapp"></i> Bot WA</button>
             <button class="cat-btn" onclick="switchCategory('bottg')"><i class="fab fa-telegram"></i> Bot Telegram</button>
-            <button class="cat-btn" onclick="switchCategory('mc')"><i class="fas fa-cube"></i> Minecraft</button>
-            <button class="cat-btn" onclick="switchCategory('samp')"><i class="fas fa-gamepad"></i> GTA SAMP</button>
-        </div>
-
-        <div data-aos="fade-up">
-            <button class="btn-glow" onclick="toggleModal('benefitModal')">
-                <i class="fas fa-star"></i> Cek Keuntungan Premium
-            </button>
+            
+            <button class="cat-btn" onclick="switchCategory('mlbb')"><i class="fas fa-mobile-alt"></i> MLBB ID</button>
+            <button class="cat-btn" onclick="switchCategory('mlbb_br')"><i class="fas fa-globe-americas"></i> MLBB Brazil</button>
+            <button class="cat-btn" onclick="switchCategory('wd_id')"><i class="fas fa-gem"></i> Weekly ID</button>
+            <button class="cat-btn" onclick="switchCategory('wd_br')"><i class="fas fa-gem"></i> Weekly Brazil</button>
         </div>
 
         <div class="glass-card" data-aos="fade-up" data-aos-delay="100">
-            <h3 style="margin-bottom: 20px; border-left: 4px solid var(--secondary); padding-left: 10px;">1. Data Akun</h3>
+            <h3 style="margin-bottom: 20px; border-left: 4px solid var(--secondary); padding-left: 10px;">1. Data Tujuan</h3>
+            
             <div class="form-group">
-                <label>Username (Untuk Login Panel)</label>
-                <input type="text" id="inpUsername" class="input-field" placeholder="Tanpa spasi, contoh: udin123">
+                <label id="lblUsername">Username (Untuk Login Panel)</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="inpUsername" class="input-field" placeholder="Masukkan Username..." style="flex: 2;">
+                    
+                    <input type="number" id="inpZone" class="input-field" placeholder="Zone ID" style="flex: 1; display: none;">
+                </div>
+
+                <div id="checkNickArea" class="check-nick-box">
+                    <button class="btn-check-nick" onclick="checkNickname()"><i class="fas fa-search"></i> Cek Nickname</button>
+                    <div id="nickResult" class="nick-result"></div>
+                </div>
             </div>
+
+            <div class="form-group" id="groupPass">
+                <label>Password Panel</label>
+                <input type="password" id="inpPass" class="input-field" placeholder="Buat password aman">
+            </div>
+
             <div class="form-group">
                 <label>Nomor WhatsApp</label>
                 <input type="number" id="inpWa" class="input-field" placeholder="08xx-xxxx-xxxx">
             </div>
+            
             <div class="form-group">
                 <label>Email Aktif</label>
                 <input type="email" id="inpEmail" class="input-field" placeholder="email@contoh.com">
-            </div>
-            <div class="form-group">
-                <label>Password Panel</label>
-                <input type="password" id="inpPass" class="input-field" placeholder="Buat password yang aman">
             </div>
         </div>
 
         <div class="glass-card" id="pricelist-container" data-aos="fade-up" data-aos-delay="200">
             <h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>
-            <div style="text-align: center; padding: 20px;">
-                <i class="fas fa-circle-notch fa-spin" style="color: var(--primary);"></i> Memuat Produk...
-            </div>
+            <div style="text-align: center; padding: 20px;"><i class="fas fa-circle-notch fa-spin"></i> Memuat Produk...</div>
         </div>
 
         <div class="glass-card" data-aos="fade-up" data-aos-delay="300">
             <h3 style="margin-bottom: 15px;">3. Pembayaran</h3>
-            <div class="form-group">
-                <select class="input-field" id="paymentMethod" disabled>
-                    <option>QRIS Otomatis</option>
-                </select>
-            </div>
-            
-            <button class="btn-checkout" onclick="processCheckout()">
-                <i class="fas fa-shopping-cart"></i> BAYAR SEKARANG
-            </button>
-            <p style="text-align: center; margin-top: 10px; font-size: 11px; color: var(--text-muted);">
-                Dengan membeli, Anda menyetujui Syarat & Ketentuan kami.
-            </p>
+            <div class="form-group"><select class="input-field" id="paymentMethod" disabled><option>QRIS Otomatis</option></select></div>
+            <button class="btn-checkout" onclick="processCheckout()"><i class="fas fa-shopping-cart"></i> BAYAR SEKARANG</button>
         </div>
 
-        <div class="footer">
-            <p>&copy; 2026 VeDollar Hub. All rights reserved.</p>
-        </div>
-    </div>
-
-    <div class="modal" id="benefitModal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('benefitModal')">&times;</span>
-            <h3 style="color: var(--primary); margin-bottom: 15px;">Keuntungan Premium</h3>
-            <div style="text-align: left; color: #cbd5e1; font-size: 14px; line-height: 2;">
-                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Auto Create Server (Langsung Aktif)</p>
-                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Panel Pterodactyl Premium</p>
-                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Anti DDoS Protection</p>
-                <p><i class="fas fa-check-circle" style="color: #4ade80"></i> Uptime 99.9% Guarantee</p>
-            </div>
-        </div>
+        <div class="footer"><p>&copy; 2026 VeDollar Hub.</p></div>
     </div>
 
     <div class="modal" id="qrisModal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('qrisModal')">&times;</span>
             <h3 style="color: #6366f1; margin-bottom: 5px;">Scan QRIS</h3>
-            <p style="font-size: 12px; color: #94a3b8;">Gunakan DANA/Gopay/OVO/BCA</p>
-            
             <div class="qr-frame" id="qrCodePlace"></div>
-            
             <p style="font-size: 14px; color: white;">Total: <b id="qrisAmount" style="color:#22c55e">Rp 0</b></p>
-            <p style="font-size: 11px; color: #64748b; margin-top: 5px;">Setelah bayar, tunggu admin memproses.</p>
-            
             <button onclick="window.location.reload()" style="margin-top:15px; padding:10px; width:100%; background:var(--primary); color:white; border:none; border-radius:10px; cursor:pointer;">Saya Sudah Bayar</button>
         </div>
     </div>
@@ -248,43 +169,28 @@
     <div class="modal" id="serverDetailModal" data-backdrop="static">
         <div class="modal-content">
             <span class="close-modal" id="btnCloseServerModal" style="display: none;" onclick="window.location.reload()">&times;</span>
-            <h3 style="color: var(--success); margin-bottom: 5px;">Pembayaran Sukses!</h3>
-            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Server aktif. Simpan data ini sekarang!</p>
+            <h3 style="color: var(--success); margin-bottom: 5px;">Transaksi Sukses!</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Pesanan sedang diproses.</p>
 
-            <div class="server-details-box">
-                <div class="copy-group">
-                    <div>
-                        <span class="copy-label">Panel URL</span>
-                        <span class="copy-val" id="resUrl">...</span>
-                    </div>
-                    <button class="btn-copy" onclick="copyToClip('resUrl', this)">Salin</button>
-                </div>
-
-                <div class="copy-group">
-                    <div>
-                        <span class="copy-label">Username</span>
-                        <span class="copy-val" id="resUser">...</span>
-                    </div>
-                    <button class="btn-copy" onclick="copyToClip('resUser', this)">Salin</button>
-                </div>
-
-                <div class="copy-group">
-                    <div>
-                        <span class="copy-label">Password</span>
-                        <span class="copy-val" id="resPass">...</span>
-                    </div>
-                    <button class="btn-copy" onclick="copyToClip('resPass', this)">Salin</button>
-                </div>
+            <div class="server-details-box" id="hostingDetails" style="display:none;">
+                <div class="copy-group"><div><span class="copy-label">Panel URL</span><span class="copy-val" id="resUrl">...</span></div></div>
+                <div class="copy-group"><div><span class="copy-label">Username</span><span class="copy-val" id="resUser">...</span></div></div>
+                <div class="copy-group"><div><span class="copy-label">Password</span><span class="copy-val" id="resPass">...</span></div></div>
+            </div>
+            
+            <div class="server-details-box" id="topupDetails" style="display:none;">
+                <p style="color:#fff; font-size:13px;">Target Akun:</p>
+                <b id="resTarget" style="color:var(--primary); font-size:16px; display:block; margin:10px 0;">...</b>
+                <p style="color:#94a3b8; font-size:11px;">Status: <span style="color:#4ade80">Sukses</span></p>
             </div>
 
-            <p class="timer-warning" id="timerText">Harap backup data! Tombol tutup muncul dalam 10s...</p>
+            <p class="timer-warning" id="timerText">Tunggu sebentar...</p>
         </div>
     </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -303,94 +209,152 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- FUNGSI COPY ---
-        window.copyToClip = (elementId, btn) => {
-            const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = btn.innerText;
-                btn.innerText = "Disalin!";
-                btn.style.background = "#22c55e";
-                btn.style.color = "white";
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.style.background = "transparent";
-                    btn.style.color = "#6366f1";
-                }, 2000);
-            });
-        }
-
-        // --- RENDER PRODUK ---
+        window.currentCategory = 'botwa';
         window.selectedProductData = null;
-        async function fetchAndRenderProducts() {
-            const container = document.getElementById('pricelist-container');
-            const categories = ['botwa', 'bottg', 'mc', 'samp'];
-            container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>';
+        window.validatedNickname = null; // Simpan nick yg sudah dicek
 
-            for (const cat of categories) {
-                const catDiv = document.createElement('div');
-                catDiv.id = cat;
-                catDiv.className = `price-category ${cat === 'botwa' ? 'active' : ''}`;
-                
-                try {
-                    const q = query(collection(db, "products"), where("category", "==", cat));
-                    const querySnapshot = await getDocs(q);
+        // --- GANTI KATEGORI ---
+        window.switchCategory = (catId) => {
+            window.currentCategory = catId;
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderProducts(catId);
 
-                    if (querySnapshot.empty) {
-                        catDiv.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px; font-size:12px;">Produk Kosong.</p>`;
-                    } else {
-                        querySnapshot.forEach((doc) => {
-                            const data = doc.data();
-                            let spekInfo = "";
-                            if(data.ram) {
-                                spekInfo = `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">
-                                    <i class="fas fa-memory"></i> ${data.ram}MB 
-                                    <i class="fas fa-microchip" style="margin-left:5px;"></i> ${data.cpu}%
-                                </div>`;
-                            }
-                            const card = document.createElement('div');
-                            card.className = 'price-card';
-                            card.innerHTML = `<div class="price-info"><h4>${data.name}</h4><p>${data.description}</p>${spekInfo}</div><div class="price-tag">Rp ${data.price}</div>`;
-                            card.onclick = function() {
-                                document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
-                                card.classList.add('selected');
-                                window.selectedProductData = {
-                                    name: data.name, price: data.price, category: data.category,
-                                    ram: data.ram, cpu: data.cpu, disk: data.disk
-                                };
-                            };
-                            catDiv.appendChild(card);
-                        });
-                    }
-                    container.appendChild(catDiv);
-                } catch (error) { console.error("Error:", error); }
+            const lblUser = document.getElementById('lblUsername');
+            const inpUser = document.getElementById('inpUsername');
+            const inpZone = document.getElementById('inpZone');
+            const grpPass = document.getElementById('groupPass');
+            const checkArea = document.getElementById('checkNickArea');
+
+            // Jika Kategori Hosting (Bot WA/TG)
+            if (['botwa', 'bottg'].includes(catId)) {
+                lblUser.innerText = "Username (Untuk Login Panel)";
+                inpUser.placeholder = "Tanpa spasi, contoh: udin123";
+                inpZone.style.display = "none";     // Hide Zone
+                checkArea.style.display = "none";   // Hide Cek Nick
+                grpPass.style.display = "block";    // Show Pass
+                window.validatedNickname = null;
+            } 
+            // Jika Kategori Topup (MLBB)
+            else {
+                lblUser.innerText = "User ID & Server";
+                inpUser.placeholder = "User ID (Contoh: 123456)";
+                inpZone.style.display = "block";    // Show Zone
+                checkArea.style.display = "block";  // Show Cek Nick
+                grpPass.style.display = "none";     // Hide Pass
+                document.getElementById('nickResult').innerHTML = ""; // Reset Nick
             }
         }
-        fetchAndRenderProducts();
 
-        // --- CHECKOUT LOGIC (URL dari Database) ---
+        async function renderProducts(cat) {
+            const container = document.getElementById('pricelist-container');
+            container.innerHTML = '<h3 style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 10px;">2. Pilih Paket</h3>';
+            try {
+                const q = query(collection(db, "products"), where("category", "==", cat));
+                const querySnapshot = await getDocs(q);
+                if (querySnapshot.empty) {
+                    container.innerHTML += `<p style="text-align:center; color:#64748b; padding:20px;">Produk Kosong.</p>`;
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const card = document.createElement('div');
+                        card.className = 'price-card';
+                        let desc = data.description || (['botwa','bottg'].includes(cat) ? "Active 30 Days" : "Proses Instan");
+                        card.innerHTML = `<div class="price-info"><h4>${data.name}</h4><p>${desc}</p></div><div class="price-tag">Rp ${data.price}</div>`;
+                        card.onclick = function() {
+                            document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
+                            card.classList.add('selected');
+                            window.selectedProductData = { ...data, category: cat };
+                        };
+                        container.appendChild(card);
+                    });
+                }
+            } catch (error) { console.error(error); }
+        }
+        renderProducts('botwa');
+
+        // --- CEK NICKNAME ---
+        window.checkNickname = async function() {
+            const userId = document.getElementById('inpUsername').value;
+            const zoneId = document.getElementById('inpZone').value;
+            const resultBox = document.getElementById('nickResult');
+
+            if(!userId || !zoneId) {
+                resultBox.innerHTML = "<span style='color:red;'>Isi ID dan Zone dulu!</span>";
+                return;
+            }
+
+            resultBox.innerHTML = "<em>Mengecek...</em>";
+
+            try {
+                // Panggil API Backend check-nickname.js
+                const res = await fetch('/api/check-nickname', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        game: window.currentCategory,
+                        id: userId,
+                        zone: zoneId
+                    })
+                });
+                const data = await res.json();
+
+                if(data.success) {
+                    resultBox.innerHTML = `Nick: ${data.nickname}`;
+                    window.validatedNickname = data.nickname; // Simpan agar bisa dipakai saat checkout
+                } else {
+                    resultBox.innerHTML = `<span style='color:red;'>${data.error || "Tidak ditemukan"}</span>`;
+                    window.validatedNickname = null;
+                }
+            } catch (e) {
+                resultBox.innerHTML = "<span style='color:red;'>Gagal cek server.</span>";
+            }
+        }
+
+        // --- CHECKOUT ---
         window.processCheckout = async function() {
             const btn = document.querySelector('.btn-checkout');
             const username = document.getElementById('inpUsername').value;
+            const zoneId = document.getElementById('inpZone').value;
             const wa = document.getElementById('inpWa').value;
             const email = document.getElementById('inpEmail').value;
-            const password = document.getElementById('inpPass').value;
+            let password = document.getElementById('inpPass').value;
 
-            if(!username || !wa || !email || !password) return showToast("Lengkapi semua data akun!", "error");
-            if(!window.selectedProductData) return showToast("Pilih paket terlebih dahulu!", "error");
+            // Validasi Hosting
+            if (['botwa', 'bottg'].includes(window.currentCategory)) {
+                if(!username || !wa || !email || !password) return showToast("Lengkapi data!", "error");
+            } 
+            // Validasi Topup
+            else {
+                if(!username || !zoneId || !wa || !email) return showToast("Lengkapi ID & Zone!", "error");
+                password = "topup-user"; 
+                // Opsional: Paksa cek nick dulu?
+                // if(!window.validatedNickname) return showToast("Cek Nickname dulu!", "error");
+            }
+
+            if(!window.selectedProductData) return showToast("Pilih paket dulu!", "error");
 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
+
+            // Jika Topup, gabungkan ID dan Zone untuk dikirim ke Backend/Griez
+            // Format Griez biasanya ID(ZONE) atau IDZONE tergantung game
+            // Kita kirim ID murni, nanti backend yg format.
+            // Tapi untuk disimpan di firebase username, kita gabung jadi satu string.
+            let finalUsername = username;
+            if (zoneId) finalUsername = `${username} (${zoneId})`;
 
             try {
                 const response = await fetch('/api/create-payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: username, email: email, password: password, whatsapp: wa,
+                        username: finalUsername, // User ID + Zone
+                        email, password, whatsapp: wa,
                         product: window.selectedProductData.name,
                         price: window.selectedProductData.price.replace(/\D/g,''),
                         category: window.selectedProductData.category,
-                        ram: window.selectedProductData.ram, cpu: window.selectedProductData.cpu, disk: window.selectedProductData.disk
+                        service_code: window.selectedProductData.service_code || "" 
                     })
                 });
 
@@ -398,17 +362,14 @@
 
                 if (result.success && result.qris_content) {
                     showToast("Order Dibuat! Silakan Scan.", "success");
-                    
                     const qrContainer = document.getElementById('qrCodePlace');
                     const qrImageUrl = `https://quickchart.io/qr?text=${encodeURIComponent(result.qris_content)}&size=300&ecLevel=L&margin=1`;
                     qrContainer.innerHTML = `<img src="${qrImageUrl}" style="width:100%; max-width:280px; border-radius:8px; display:block; margin:0 auto;" alt="QRIS Code">`;
-
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price;
                     document.getElementById('qrisModal').style.display = "flex";
                     btn.innerHTML = 'BAYAR SEKARANG';
                     btn.disabled = false;
 
-                    // --- DETEKSI PEMBAYARAN & TAMPILKAN POPUP SERVER ---
                     const orderDocRef = doc(db, "orders", result.order_id);
                     const unsubscribe = onSnapshot(orderDocRef, (docSnap) => {
                         if (docSnap.exists()) {
@@ -417,28 +378,29 @@
                                 document.getElementById('qrisModal').style.display = "none";
                                 document.getElementById('serverDetailModal').style.display = 'flex';
                                 
-                                // AMBIL URL DARI DATABASE
-                                if (data.panel_url) {
-                                    document.getElementById('resUrl').innerText = data.panel_url;
+                                if (['botwa', 'bottg'].includes(data.category)) {
+                                    document.getElementById('hostingDetails').style.display = 'block';
+                                    document.getElementById('topupDetails').style.display = 'none';
+                                    document.getElementById('resUrl').innerText = data.panel_url || "...";
+                                    document.getElementById('resUser').innerText = data.username;
+                                    document.getElementById('resPass').innerText = data.password;
                                 } else {
-                                    document.getElementById('resUrl').innerText = "https://panel.nosh.id"; // Fallback
+                                    document.getElementById('hostingDetails').style.display = 'none';
+                                    document.getElementById('topupDetails').style.display = 'block';
+                                    // Tampilkan Nickname jika ada, kalau tidak ya ID-nya
+                                    const showName = window.validatedNickname ? `${data.username} (${window.validatedNickname})` : data.username;
+                                    document.getElementById('resTarget').innerText = showName;
                                 }
 
-                                document.getElementById('resUser').innerText = data.username;
-                                document.getElementById('resPass').innerText = data.password;
-
-                                let timeLeft = 10;
+                                let timeLeft = 5;
                                 const timerText = document.getElementById('timerText');
                                 const closeBtn = document.getElementById('btnCloseServerModal');
-                                closeBtn.style.display = "none";
-                                
                                 const countdown = setInterval(() => {
                                     timeLeft--;
-                                    timerText.innerText = `Harap backup data! Tombol tutup muncul dalam ${timeLeft}s...`;
+                                    timerText.innerText = `Boleh ditutup dalam ${timeLeft}s...`;
                                     if(timeLeft <= 0) {
                                         clearInterval(countdown);
-                                        timerText.innerText = "Data aman? Silakan tutup popup.";
-                                        timerText.style.color = "#4ade80";
+                                        timerText.innerText = "Transaksi Selesai.";
                                         closeBtn.style.display = "block";
                                     }
                                 }, 1000);
@@ -446,36 +408,22 @@
                             }
                         }
                     });
-
                 } else {
-                    showToast("Gagal: " + (result.error || "Gagal QRIS"), "error");
-                    btn.disabled = false;
-                    btn.innerHTML = 'BAYAR SEKARANG';
+                    showToast("Gagal: " + (result.error), "error");
+                    btn.disabled = false; btn.innerHTML = 'BAYAR SEKARANG';
                 }
-
             } catch (error) {
                 console.error(error);
                 showToast("Server Error", "error");
-                btn.disabled = false;
-                btn.innerHTML = 'BAYAR SEKARANG';
+                btn.disabled = false; btn.innerHTML = 'BAYAR SEKARANG';
             }
         };
 
         function showToast(msg, type) { Toastify({ text: msg, duration: 3000, gravity: "top", position: "center", backgroundColor: type === "success" ? "#22c55e" : "#ef4444" }).showToast(); }
-        AOS.init({ duration: 800, once: true });
-        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
-        window.toggleModal = (id) => document.getElementById(id ? id : 'benefitModal').style.display = 'flex';
+        AOS.init();
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-        window.switchCategory = (catId) => {
-            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            document.querySelectorAll('.price-category').forEach(el => el.classList.remove('active'));
-            if(document.getElementById(catId)) document.getElementById(catId).classList.add('active');
-        }
-        let slideIndex = 0; const slides = document.querySelectorAll('.banner-slide');
-        function showSlides() { if(slides.length > 0) { slides.forEach(s => s.classList.remove('active')); slideIndex++; if (slideIndex > slides.length) slideIndex = 1; slides[slideIndex - 1].classList.add('active'); setTimeout(showSlides, 4000); } }
-        showSlides();
-        particlesJS("particles-js", { "particles": { "number": { "value": 50 }, "color": { "value": "#6366f1" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#a855f7", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 2 } } });
+        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
+        particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "size": { "value": 3 } } });
     </script>
 </body>
 </html>
