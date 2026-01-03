@@ -11,57 +11,48 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <style>
-        /* --- VARIABLES & RESET --- */
-        :root {
-            --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.7); --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-            --primary: #6366f1; --secondary: #a855f7; --text-main: #f8fafc; --text-muted: #94a3b8;
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --success: #22c55e;
-        }
+        :root { --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.7); --glass-border: 1px solid rgba(255, 255, 255, 0.1); --primary: #6366f1; --secondary: #a855f7; --text-main: #f8fafc; --text-muted: #94a3b8; --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); --success: #22c55e; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
         body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; padding-bottom: 80px; }
-        
         #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
-        
         .container { max-width: 600px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
         
-        /* HEADER & BANNER */
+        /* HEADER */
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; margin-bottom: 20px; }
         .logo-area h2 { color: #fff; font-weight: 700; font-size: 22px; }
         
         .banner-container { width: 100%; aspect-ratio: 16/9; border-radius: 15px; overflow: hidden; position: relative; margin-bottom: 25px; border: var(--glass-border); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .banner-slide { width: 100%; height: 100%; object-fit: cover; }
         
-        /* CATEGORY SCROLL */
-        .category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
+        /* CATEGORY */
+        .category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none; }
         .cat-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .cat-btn.active, .cat-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
 
-        /* CARDS */
+        /* BUTTON BENEFIT */
+        .btn-benefit { background: transparent; border: 1px dashed var(--secondary); color: var(--secondary); width: 100%; padding: 8px; border-radius: 8px; font-size: 12px; margin-bottom: 20px; cursor: pointer; transition: 0.3s; }
+        .btn-benefit:hover { background: rgba(168, 85, 247, 0.1); }
+
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: var(--glass-border); border-radius: 16px; padding: 20px; margin-bottom: 20px; transition: 0.3s; }
         
-        /* FORM INPUTS */
         .form-group { margin-bottom: 15px; }
         .form-group label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; display: block; }
         .input-field { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 12px; border-radius: 10px; color: #fff; outline: none; transition: 0.3s; }
         .input-field:focus { border-color: var(--primary); }
 
-        /* PRODUCT LIST */
         .product-card { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid transparent; cursor: pointer; transition: 0.2s; }
         .product-card:hover, .product-card.selected { border-color: var(--secondary); background: rgba(168, 85, 247, 0.1); }
         .product-info h4 { font-size: 14px; margin-bottom: 3px; color: #fff; }
         .product-info p { font-size: 11px; color: var(--text-muted); }
         .product-price { font-weight: bold; color: var(--secondary); font-size: 14px; }
         
-        /* STOCK BADGE */
         .badge-stock { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: black; font-weight: bold; }
         .stock-ready { background: #4ade80; }
         .stock-empty { background: #ef4444; color: white; }
 
-        /* BUTTON CHECKOUT */
         .btn-checkout { width: 100%; padding: 15px; background: var(--accent-gradient); border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3); }
         .btn-checkout:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        /* MODALS */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-content { background: #1e293b; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--secondary); animation: popUp 0.4s; }
         .qr-frame { background: white; padding: 10px; border-radius: 10px; margin: 15px 0; }
@@ -84,10 +75,14 @@
 
         <div class="category-scroll" data-aos="fade-right">
             <button class="cat-btn active" onclick="switchCat('botwa')"><i class="fab fa-whatsapp"></i> Bot WA</button>
-            <button class="cat-btn" onclick="switchCat('bottg')"><i class="fab fa-telegram"></i> Bot Telegram</button>
+            <button class="cat-btn" onclick="switchCat('bottg')"><i class="fab fa-telegram"></i> Bot Tele</button>
             <button class="cat-btn" onclick="switchCat('vps')"><i class="fas fa-server"></i> VPS Manual</button>
             <button class="cat-btn" onclick="switchCat('app')"><i class="fas fa-cube"></i> App Premium</button>
         </div>
+
+        <button class="btn-benefit" onclick="showBenefit()">
+            <i class="fas fa-info-circle"></i> Cek Keuntungan / Benefit Paket Ini
+        </button>
 
         <div class="glass-card" id="formCard" data-aos="fade-up">
             <h3 style="margin-bottom: 20px; border-left: 4px solid var(--secondary); padding-left: 10px;">1. Data Panel</h3>
@@ -120,6 +115,14 @@
         
         <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #64748b;">
             &copy; 2026 VeDollar Hub. All Rights Reserved.
+        </div>
+    </div>
+
+    <div class="modal" id="benefitModal">
+        <div class="modal-content">
+            <h3 style="color:#fb923c; margin-bottom:10px;"><i class="fas fa-star"></i> Benefit</h3>
+            <p id="benefitText" style="color:#ccc; font-size:13px; white-space:pre-line; text-align:left;">Memuat...</p>
+            <button onclick="document.getElementById('benefitModal').style.display='none'" style="margin-top:20px; width:100%; padding:10px; background:#334155; color:white; border:none; border-radius:8px;">Tutup</button>
         </div>
     </div>
 
@@ -163,7 +166,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, query, where, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // CONFIG FIREBASE
         const firebaseConfig = {
@@ -180,10 +183,28 @@
         const db = getFirestore(app);
 
         // --- CONFIG ---
-        const ADMIN_WA = "6285123456789"; // GANTI NO WA ADMIN DISINI (Tanpa +)
+        const ADMIN_WA = "6285123456789"; // GANTI NO WA ADMIN DISINI
 
         window.currentCategory = 'botwa';
         window.selectedProductData = null;
+        window.benefitData = {};
+
+        // --- LOAD BENEFIT DATA ---
+        async function loadBenefits() {
+            try {
+                const docSnap = await getDoc(doc(db, "settings", "benefits"));
+                if(docSnap.exists()) window.benefitData = docSnap.data();
+            } catch(e) { console.log("No benefits loaded"); }
+        }
+        loadBenefits();
+
+        // --- SHOW BENEFIT ---
+        window.showBenefit = () => {
+            const cat = window.currentCategory;
+            let text = window.benefitData[cat] || "Belum ada info benefit.";
+            document.getElementById('benefitText').innerText = text;
+            document.getElementById('benefitModal').style.display = 'flex';
+        }
 
         // --- GANTI KATEGORI ---
         window.switchCat = (catId) => {
@@ -197,9 +218,9 @@
             // 2. Logic Form (Sembunyikan Input jika VPS/App)
             const formCard = document.getElementById('formCard');
             if (['botwa', 'bottg'].includes(catId)) {
-                formCard.style.display = 'block'; // Tampilkan Form (Butuh Data untuk Panel)
+                formCard.style.display = 'block'; 
             } else {
-                formCard.style.display = 'none'; // Sembunyikan Form (VPS/App Tanpa Input)
+                formCard.style.display = 'none'; 
             }
 
             renderProducts(catId);
@@ -216,7 +237,7 @@
                 container.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    container.innerHTML = `<p style="text-align:center; color:#64748b;">Produk Kosong.</p>`;
+                    container.innerHTML = `<p style="text-align:center; color:#64748b;">Produk Kosong (Cek Admin Panel).</p>`;
                 } else {
                     querySnapshot.forEach((docSnap) => {
                         const data = docSnap.data();
@@ -274,7 +295,6 @@
 
             // --- JIKA VPS (MANUAL VIA WA) ---
             if (window.currentCategory === 'vps') {
-                // Template Pesan Sesuai Request
                 const msg = `halo min, saya tertarik dengan ${window.selectedProductData.name} apakah stock masih tersedia?`;
                 window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`, '_blank');
                 return;
@@ -284,14 +304,13 @@
             let username = "Guest";
             let email = "guest@no-email.com";
             let password = "manual-process";
-            let wa = "00000000000"; // Dummy WA (Backend butuh field ini tapi tidak dipakai)
+            let wa = "00000000000"; 
 
             if (['botwa', 'bottg'].includes(window.currentCategory)) {
                 username = document.getElementById('inpUsername').value;
                 email = document.getElementById('inpEmail').value;
                 password = document.getElementById('inpPass').value;
                 
-                // Validasi Bot
                 if(!username || !email || !password) return showToast("Lengkapi data Panel Bot!", "error");
             }
 
@@ -303,7 +322,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username, email, password, whatsapp: wa, // Kirim dummy WA agar backend tidak error
+                        username, email, password, whatsapp: wa, 
                         product: window.selectedProductData.name,
                         price: window.selectedProductData.price.toString().replace(/\D/g,''),
                         category: window.selectedProductData.category,
@@ -314,7 +333,6 @@
                 const result = await response.json();
 
                 if (result.success && result.qris_content) {
-                    // TAMPILKAN QRIS
                     const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(result.qris_content)}&size=300&ecLevel=L&margin=1`;
                     document.getElementById('qrCodePlace').innerHTML = `<img src="${qrUrl}" style="width:100%; max-width:280px; border-radius:8px; display:block; margin:0 auto;" alt="QRIS Code">`;
                     document.getElementById('qrisAmount').innerText = "Rp " + window.selectedProductData.price.toLocaleString();
@@ -322,7 +340,6 @@
                     btn.innerHTML = 'BAYAR SEKARANG';
                     btn.disabled = false;
 
-                    // LISTENER FIREBASE (Cek Status Pembayaran)
                     const orderDocRef = doc(db, "orders", result.order_id);
                     const unsubscribe = onSnapshot(orderDocRef, (docSnap) => {
                         if (docSnap.exists()) {
@@ -331,14 +348,11 @@
                                 document.getElementById('qrisModal').style.display = "none";
                                 document.getElementById('serverDetailModal').style.display = 'flex';
                                 
-                                // TAMPILAN SUKSES
                                 if (window.currentCategory === 'app') {
-                                    // Tampilkan Akun
                                     document.getElementById('hostingDetails').style.display = 'none';
                                     document.getElementById('appDetails').style.display = 'block';
                                     document.getElementById('resAccount').innerHTML = data.delivered_account || "Sedang diproses...";
                                 } else {
-                                    // Tampilkan Panel Bot
                                     document.getElementById('hostingDetails').style.display = 'block';
                                     document.getElementById('appDetails').style.display = 'none';
                                     document.getElementById('resUrl').innerText = data.panel_url || "Proses...";
@@ -346,7 +360,6 @@
                                     document.getElementById('resPass').innerText = data.password;
                                 }
 
-                                // Timer Tombol Tutup
                                 let timeLeft = 5;
                                 const timerText = document.getElementById('timerText');
                                 const closeBtn = document.getElementById('btnCloseServerModal');
@@ -379,7 +392,6 @@
         AOS.init();
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
         
-        // Particles Config
         particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "size": { "value": 3 } } });
     </script>
 </body>

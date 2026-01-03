@@ -17,25 +17,16 @@
         .glass-card { background: var(--glass-bg); border: var(--glass-border); border-radius: 16px; padding: 25px; margin-bottom: 25px; position: relative; }
         .input-field, select, textarea { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 10px; border-radius: 8px; color: #fff; outline: none; margin-bottom: 10px; }
         
-        /* BUTTONS */
         .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
         .btn-green { background: #22c55e; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
         .btn-purple { background: #a855f7; color: white; }
-        .btn-yellow { background: #f59e0b; color: white; } /* Tombol Edit */
-        .btn-gray { background: #64748b; color: white; } /* Tombol Batal */
+        .btn-orange { background: #f97316; color: white; } /* Tombol Benefit */
+        .btn-del { background: #ef4444; color: white; width: auto; padding: 5px 15px; margin: 0; }
         
-        .btn-action { width: auto; padding: 5px 10px; font-size: 12px; margin-right: 5px; cursor: pointer; border-radius: 4px; border: none; color: white; }
-        .bg-red { background: #ef4444; }
-        .bg-yellow { background: #f59e0b; }
-
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         th, td { text-align: left; padding: 10px; border-bottom: 1px solid #334155; }
         h3 { margin-bottom: 15px; font-size: 18px; }
-        
-        /* Edit Mode Indicator */
-        .edit-badge { display: none; background: #f59e0b; color: black; padding: 2px 8px; border-radius: 4px; font-size: 10px; position: absolute; top: 25px; right: 25px; font-weight: bold; }
-        .editing .edit-badge { display: inline-block; }
     </style>
 </head>
 <body>
@@ -45,28 +36,40 @@
             <a href="index.html" style="color:#aaa; text-decoration:none; font-size:14px;"><i class="fas fa-arrow-left"></i> Kembali</a>
         </div>
 
-        <div class="glass-card" id="cardApp" style="border-left: 4px solid #22c55e;">
-            <span class="edit-badge">MODE EDIT</span>
-            <h3 style="color:#4ade80"><i class="fas fa-cube"></i> App Premium (Stok)</h3>
-            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">
-                <b>Aturan Stok:</b> Gunakan tanda titik dua <b>:</b> sebagai pembatas antar akun.<br>
-                Contoh: <code>Akun 1 bla bla : Akun 2 bla bla : Akun 3</code>
-            </p>
+        <div class="glass-card" style="border-left: 4px solid #f97316;">
+            <h3 style="color:#fb923c"><i class="fas fa-info-circle"></i> Atur Teks Benefit</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">Teks ini akan muncul saat user klik tombol "Cek Benefit".</p>
             
-            <input type="hidden" id="editIdApp"> <input type="text" id="appName" class="input-field" placeholder="Nama App (Misal: Netflix 1 Bulan)">
-            <input type="number" id="appPrice" class="input-field" placeholder="Harga (Rp)">
-            <textarea id="appStock" class="input-field" rows="4" placeholder="email@gmail.com&#10;:&#10;email2@gmail.com&#10;:&#10;email3@gmail.com"></textarea>
+            <label style="font-size:12px; color:#aaa">Benefit Bot WhatsApp</label>
+            <textarea id="benBotWa" class="input-field" rows="2" placeholder="Bot on 24 jam..."></textarea>
             
-            <div id="btnGroupApp">
-                <button class="btn btn-green" onclick="addAppProduct()">Simpan Baru</button>
-            </div>
+            <label style="font-size:12px; color:#aaa">Benefit Bot Telegram</label>
+            <textarea id="benBotTg" class="input-field" rows="2" placeholder="Fast respon..."></textarea>
+            
+            <label style="font-size:12px; color:#aaa">Benefit VPS</label>
+            <textarea id="benVps" class="input-field" rows="2" placeholder="Full Root Access..."></textarea>
+            
+            <label style="font-size:12px; color:#aaa">Benefit App Premium</label>
+            <textarea id="benApp" class="input-field" rows="2" placeholder="Garansi..."></textarea>
+
+            <button class="btn btn-orange" onclick="saveBenefits()">Simpan Benefit</button>
         </div>
 
-        <div class="glass-card" id="cardHost" style="border-left: 4px solid #3b82f6;">
-            <span class="edit-badge">MODE EDIT</span>
-            <h3 style="color:#60a5fa"><i class="fas fa-robot"></i> Hosting Bot (Auto Pterodactyl)</h3>
+        <div class="glass-card" style="border-left: 4px solid #22c55e;">
+            <h3 style="color:#4ade80"><i class="fas fa-cube"></i> Tambah App Premium (Stok)</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:10px;">Format Stok: <code>akun1|pass : akun2|pass</code> (Pemisah pakai titik dua <b>:</b> )</p>
             
-            <input type="hidden" id="editIdHost"> <input type="text" id="hostName" class="input-field" placeholder="Nama Paket (Misal: Bot WA Basic)">
+            <input type="text" id="appName" class="input-field" placeholder="Nama App (Misal: Netflix 1 Bulan)">
+            <input type="number" id="appPrice" class="input-field" placeholder="Harga (Rp)">
+            <textarea id="appStock" class="input-field" rows="3" placeholder="email1@gmail.com|pass|info : email2@gmail.com|pass|info"></textarea>
+            
+            <button class="btn btn-green" onclick="addAppProduct()">Simpan App Premium</button>
+        </div>
+
+        <div class="glass-card" style="border-left: 4px solid #3b82f6;">
+            <h3 style="color:#60a5fa"><i class="fas fa-robot"></i> Tambah Hosting Bot (Auto)</h3>
+            
+            <input type="text" id="hostName" class="input-field" placeholder="Nama Paket (Misal: Bot WA Basic)">
             <input type="number" id="hostPrice" class="input-field" placeholder="Harga (Rp)">
             
             <select id="hostCat" class="input-field">
@@ -80,22 +83,17 @@
                 <input type="number" id="hostDisk" class="input-field" placeholder="Disk (MB)" value="1000">
             </div>
 
-            <div id="btnGroupHost">
-                <button class="btn btn-blue" onclick="addHostProduct()">Simpan Baru</button>
-            </div>
+            <button class="btn btn-blue" onclick="addHostProduct()">Simpan Paket Bot</button>
         </div>
 
-        <div class="glass-card" id="cardVps" style="border-left: 4px solid #a855f7;">
-            <span class="edit-badge">MODE EDIT</span>
-            <h3 style="color:#c084fc"><i class="fas fa-server"></i> VPS (Manual)</h3>
+        <div class="glass-card" style="border-left: 4px solid #a855f7;">
+            <h3 style="color:#c084fc"><i class="fas fa-server"></i> Tambah VPS (Manual)</h3>
 
-            <input type="hidden" id="editIdVps"> <input type="text" id="vpsName" class="input-field" placeholder="Nama VPS">
+            <input type="text" id="vpsName" class="input-field" placeholder="Nama VPS (Misal: VPS 2GB SG)">
             <input type="number" id="vpsPrice" class="input-field" placeholder="Harga (Rp)">
             <input type="text" id="vpsDesc" class="input-field" placeholder="Deskripsi (Opsional)">
             
-            <div id="btnGroupVps">
-                <button class="btn btn-purple" onclick="addVpsProduct()">Simpan Baru</button>
-            </div>
+            <button class="btn btn-purple" onclick="addVpsProduct()">Simpan Produk VPS</button>
         </div>
 
         <div class="glass-card">
@@ -112,7 +110,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, setDoc, doc, getDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const db = getFirestore(initializeApp({
             apiKey: "AIzaSyCsUfb9HtWHcziy82aOCdkiOiJqeJ4y-34",
@@ -120,8 +118,34 @@
             projectId: "vedollar-hub"
         }));
 
-        // SIMPAN DATA PRODUK LOKAL (UNTUK FITUR EDIT)
-        window.allProducts = {};
+        // --- LOAD BENEFIT SAAT START ---
+        async function loadBenefits() {
+            try {
+                const docSnap = await getDoc(doc(db, "settings", "benefits"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('benBotWa').value = data.botwa || "";
+                    document.getElementById('benBotTg').value = data.bottg || "";
+                    document.getElementById('benVps').value = data.vps || "";
+                    document.getElementById('benApp').value = data.app || "";
+                }
+            } catch(e) { console.error("Load benefit error:", e); }
+        }
+        loadBenefits();
+
+        // --- FUNGSI SAVE BENEFIT ---
+        window.saveBenefits = async () => {
+            const data = {
+                botwa: document.getElementById('benBotWa').value,
+                bottg: document.getElementById('benBotTg').value,
+                vps: document.getElementById('benVps').value,
+                app: document.getElementById('benApp').value
+            };
+            try {
+                await setDoc(doc(db, "settings", "benefits"), data);
+                showToast("Benefit berhasil disimpan!", "success");
+            } catch(e) { showToast(e.message, "error"); }
+        };
 
         // --- 1. APP PREMIUM ---
         window.addAppProduct = async () => {
@@ -131,8 +155,7 @@
             
             if(!name || !price || !rawStock) return alert("Lengkapi data App!");
             
-            // PEMBATAS HANYA TITIK DUA (:)
-            const stockArray = rawStock.split('=').map(s => s.trim()).filter(s => s !== "");
+            const stockArray = rawStock.split(':').map(s => s.trim()).filter(s => s !== "");
 
             try {
                 await addDoc(collection(db, "products"), {
@@ -140,24 +163,7 @@
                     stock: stockArray, description: "Pengiriman Otomatis"
                 });
                 showToast(`App tersimpan! ${stockArray.length} stok.`, "success");
-                resetForm('app');
-            } catch(e) { alert(e.message); }
-        };
-
-        window.updateAppProduct = async () => {
-            const id = document.getElementById('editIdApp').value;
-            const name = document.getElementById('appName').value;
-            const price = document.getElementById('appPrice').value;
-            const rawStock = document.getElementById('appStock').value;
-            
-            const stockArray = rawStock.split('=').map(s => s.trim()).filter(s => s !== "");
-
-            try {
-                await updateDoc(doc(db, "products", id), {
-                    name, price: parseInt(price), stock: stockArray
-                });
-                showToast("Produk App berhasil diupdate!", "success");
-                resetForm('app');
+                document.getElementById('appName').value = ""; document.getElementById('appStock').value = "";
             } catch(e) { alert(e.message); }
         };
 
@@ -167,7 +173,6 @@
             const price = document.getElementById('hostPrice').value;
             const cat = document.getElementById('hostCat').value;
             
-            // Ambil spek
             const ram = parseInt(document.getElementById('hostRam').value) || 1024;
             const cpu = parseInt(document.getElementById('hostCpu').value) || 100;
             const disk = parseInt(document.getElementById('hostDisk').value) || 1000;
@@ -181,27 +186,7 @@
                     ram, cpu, disk
                 });
                 showToast("Paket Bot tersimpan.", "success");
-                resetForm('host');
-            } catch(e) { alert(e.message); }
-        };
-
-        window.updateHostProduct = async () => {
-            const id = document.getElementById('editIdHost').value;
-            const name = document.getElementById('hostName').value;
-            const price = document.getElementById('hostPrice').value;
-            const cat = document.getElementById('hostCat').value;
-            const ram = parseInt(document.getElementById('hostRam').value);
-            const cpu = parseInt(document.getElementById('hostCpu').value);
-            const disk = parseInt(document.getElementById('hostDisk').value);
-
-            try {
-                await updateDoc(doc(db, "products", id), {
-                    name, price: parseInt(price), category: cat,
-                    description: `RAM ${ram}MB, CPU ${cpu}%`,
-                    ram, cpu, disk
-                });
-                showToast("Paket Bot diupdate.", "success");
-                resetForm('host');
+                document.getElementById('hostName').value = "";
             } catch(e) { alert(e.message); }
         };
 
@@ -219,126 +204,20 @@
                     description: desc || "Manual via WA"
                 });
                 showToast("Produk VPS tersimpan.", "success");
-                resetForm('vps');
-            } catch(e) { alert(e.message); }
-        };
-
-        window.updateVpsProduct = async () => {
-            const id = document.getElementById('editIdVps').value;
-            const name = document.getElementById('vpsName').value;
-            const price = document.getElementById('vpsPrice').value;
-            const desc = document.getElementById('vpsDesc').value;
-
-            try {
-                await updateDoc(doc(db, "products", id), {
-                    name, price: parseInt(price), description: desc
-                });
-                showToast("VPS diupdate.", "success");
-                resetForm('vps');
-            } catch(e) { alert(e.message); }
-        };
-
-        // --- HELPER FUNCTIONS ---
-        window.editProduct = (id) => {
-            const p = window.allProducts[id];
-            if(!p) return;
-
-            if(p.category === 'app') {
-                // Populate App Form
-                document.getElementById('editIdApp').value = id;
-                document.getElementById('appName').value = p.name;
-                document.getElementById('appPrice').value = p.price;
-                // Gabungkan stok kembali dengan :
-                document.getElementById('appStock').value = (p.stock || []).join(' = '); 
-                
-                // Ubah Tampilan jadi Edit Mode
-                setEditMode('app', true);
-                document.getElementById('cardApp').scrollIntoView({behavior: "smooth"});
-            } 
-            else if(['botwa', 'bottg'].includes(p.category)) {
-                // Populate Host Form
-                document.getElementById('editIdHost').value = id;
-                document.getElementById('hostName').value = p.name;
-                document.getElementById('hostPrice').value = p.price;
-                document.getElementById('hostCat').value = p.category;
-                document.getElementById('hostRam').value = p.ram;
-                document.getElementById('hostCpu').value = p.cpu;
-                document.getElementById('hostDisk').value = p.disk;
-
-                setEditMode('host', true);
-                document.getElementById('cardHost').scrollIntoView({behavior: "smooth"});
-            }
-            else if(p.category === 'vps') {
-                // Populate VPS Form
-                document.getElementById('editIdVps').value = id;
-                document.getElementById('vpsName').value = p.name;
-                document.getElementById('vpsPrice').value = p.price;
-                document.getElementById('vpsDesc').value = p.description;
-
-                setEditMode('vps', true);
-                document.getElementById('cardVps').scrollIntoView({behavior: "smooth"});
-            }
-        };
-
-        window.cancelEdit = (type) => {
-            resetForm(type);
-        };
-
-        function setEditMode(type, isEdit) {
-            const card = document.getElementById(type === 'app' ? 'cardApp' : type === 'host' ? 'cardHost' : 'cardVps');
-            const btnGroup = document.getElementById(type === 'app' ? 'btnGroupApp' : type === 'host' ? 'btnGroupHost' : 'btnGroupVps');
-            const properName = type === 'app' ? 'App' : type === 'host' ? 'Host' : 'Vps';
-            
-            if(isEdit) {
-                card.classList.add('editing');
-                btnGroup.innerHTML = `
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn btn-yellow" onclick="update${properName}Product()">Update Perubahan</button>
-                        <button class="btn btn-gray" onclick="cancelEdit('${type}')">Batal</button>
-                    </div>
-                `;
-            } else {
-                card.classList.remove('editing');
-                // Kembalikan tombol simpan awal
-                if(type === 'app') btnGroup.innerHTML = `<button class="btn btn-green" onclick="addAppProduct()">Simpan Baru</button>`;
-                if(type === 'host') btnGroup.innerHTML = `<button class="btn btn-blue" onclick="addHostProduct()">Simpan Baru</button>`;
-                if(type === 'vps') btnGroup.innerHTML = `<button class="btn btn-purple" onclick="addVpsProduct()">Simpan Baru</button>`;
-            }
-        }
-
-        function resetForm(type) {
-            setEditMode(type, false);
-            if(type === 'app') {
-                document.getElementById('appName').value = "";
-                document.getElementById('appPrice').value = "";
-                document.getElementById('appStock').value = "";
-            } else if(type === 'host') {
-                document.getElementById('hostName').value = "";
-                document.getElementById('hostPrice').value = "";
-            } else {
                 document.getElementById('vpsName').value = "";
-                document.getElementById('vpsPrice').value = "";
-                document.getElementById('vpsDesc').value = "";
-            }
-        }
+            } catch(e) { alert(e.message); }
+        };
 
-        function showToast(msg, type) {
-            Toastify({ text: msg, duration: 3000, gravity: "top", position: "center", backgroundColor: type === "success" ? "#22c55e" : "#ef4444" }).showToast();
-        }
-
-        // --- LOAD DATA ---
+        // --- LOAD LIST PRODUK ---
         onSnapshot(query(collection(db, "products"), orderBy("category")), (snap) => {
             const tb = document.querySelector('#prodTable tbody');
             tb.innerHTML = "";
             if(snap.empty) { tb.innerHTML = "<tr><td colspan='5'>Belum ada produk</td></tr>"; return; }
 
-            window.allProducts = {}; // Reset cache
-
             snap.forEach(d => {
                 const p = d.data();
-                window.allProducts[d.id] = p; // Simpan ke cache utk edit
-
                 let info = "-";
+                
                 if(p.category === 'app') {
                     const count = p.stock ? p.stock.length : 0;
                     info = count > 0 ? `<b style="color:#4ade80">${count} Stok</b>` : `<b style="color:red">HABIS</b>`;
@@ -354,16 +233,14 @@
                         <td><span style="background:#334155; padding:2px 6px; border-radius:4px; font-size:11px;">${p.category}</span></td>
                         <td>${p.price}</td>
                         <td>${info}</td>
-                        <td>
-                            <button class="btn-action bg-yellow" onclick="editProduct('${d.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn-action bg-red" onclick="del('${d.id}')"><i class="fas fa-trash"></i></button>
-                        </td>
+                        <td><button class="btn-del" onclick="del('${d.id}')"><i class="fas fa-trash"></i></button></td>
                     </tr>
                 `;
             });
         });
 
         window.del = async(id) => { if(confirm("Hapus produk ini?")) await deleteDoc(doc(db, "products", id)); };
+        function showToast(msg, type) { Toastify({ text: msg, duration: 3000, gravity: "top", position: "center", backgroundColor: type === "success" ? "#22c55e" : "#ef4444" }).showToast(); }
     </script>
 </body>
 </html>
