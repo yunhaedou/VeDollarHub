@@ -12,50 +12,64 @@ export default async function handler(req, res) {
     try {
         const orderId = `ORDER-${new Date().getTime()}-${Math.floor(Math.random() * 1000)}`;
 
-        // BERDASARKAN GAMBAR DOKUMENTASI:
-        // 1. URL: https://app.pakasir.com/api/transactioncreate/{method}
-        // 2. Method: qris
-        // 3. Body Key: "project" (bukan project_id)
-        
+        // Sesuai Dokumentasi Gambar:
+        // URL: https://app.pakasir.com/api/transactioncreate/qris
+        // Body: project, order_id, amount, api_key
         const payload = {
             api_key: process.env.PAKASIR_API_KEY,
-            project: process.env.PAKASIR_PROJECT_ID, // Sesuai docs key-nya 'project'
+            project: process.env.PAKASIR_PROJECT_ID,
             amount: parseInt(price),
-            order_id: orderId
+            order_id: orderId,
+            description: `Beli ${product}`,
+            payment_method: "qris",
+            customer_name: username,
+            customer_email: email,
+            customer_phone: whatsapp
         };
 
         const pakasirReq = await fetch('https://app.pakasir.com/api/transactioncreate/qris', {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify(payload)
         });
 
-        // Debugging jika error HTTP
         if (!pakasirReq.ok) {
             const errText = await pakasirReq.text();
             console.error("Pakasir HTTP Error:", pakasirReq.status, errText);
             return res.status(pakasirReq.status).json({ 
-                error: `Koneksi Pakasir Gagal (${pakasirReq.status}). Cek Project ID/API Key.` 
+                error: `Koneksi Pakasir Gagal (${pakasirReq.status}). Cek API Key/Project ID.` 
             });
         }
 
         const pakasirRes = await pakasirReq.json();
 
-        // Cek Success (Docs tidak eksplisit soal field success, tapi kita cek response)
-        // Biasanya respon sukses berisi key 'transaction' atau 'data'
-        if (!pakasirRes.data?.qr_string && !pakasirRes.qr_string && !pakasirRes.transaction?.qr_string) {
-            console.error("Pakasir Response Aneh:", JSON.stringify(pakasirRes));
-            return res.status(500).json({ error: "Gagal dapat QR. Cek config Pakasir." });
+        // LOGIC BARU BERDASARKAN SCREENSHOT:
+        // Respon sukses ada di dalam object "payment", key-nya "payment_number"
+        let qrString = null;
+
+        if (pakasirRes.payment && pakasirRes.payment.payment_number) {
+            qrString = pakasirRes.payment.payment_number;
+        } 
+        // Jaga-jaga jika formatnya beda (backup check)
+        else if (pakasirRes.data?.qr_string) {
+            qrString = pakasirRes.data.qr_string;
+        }
+        else if (pakasirRes.qr_string) {
+            qrString = pakasirRes.qr_string;
         }
 
-        // Ambil QR String (Support berbagai kemungkinan format respon)
-        const qrString = pakasirRes.data?.qr_string || pakasirRes.qr_string || pakasirRes.transaction?.qr_string;
+        // Jika QR Kosong, berarti Gagal atau Error dari Pakasir
+        if (!qrString) {
+            console.error("Pakasir Response Raw:", JSON.stringify(pakasirRes));
+            // Tampilkan error asli dari JSON response jika ada
+            const msg = pakasirRes.message || pakasirRes.error || "Format Respon Pakasir Tidak Dikenali";
+            return res.status(500).json({ error: `Gagal: ${msg}` });
+        }
 
         // Simpan ke Firebase
-        // Username yang disimpan disini adalah INPUT AWAL.
-        // Nanti Webhook yang akan mengubahnya jika Pterodactyl generate username baru (misal caspertes80)
         await db.collection('orders').doc(orderId).set({
             order_id: orderId,
             username, email, password, whatsapp,
@@ -76,4 +90,4 @@ export default async function handler(req, res) {
         console.error("System Error:", error);
         return res.status(500).json({ error: 'System Error: ' + error.message });
     }
-            }
+}
