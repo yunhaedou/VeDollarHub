@@ -1,13 +1,12 @@
-import { db } from './utils/firebase.js';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
     const GRIEZ_API_ID = process.env.GRIEZ_API_ID;
     const GRIEZ_API_KEY = process.env.GRIEZ_API_KEY;
-    const URL_SERVICE = "https://griezstore.id/api/service"; //
+    const URL_SERVICE = "https://griezstore.id/api/service";
 
     if (!GRIEZ_API_ID || !GRIEZ_API_KEY) {
-        return res.status(500).json({ error: "API Key Griez belum disetting di Vercel" });
+        return res.status(500).json({ error: "API Key belum disetting" });
     }
 
     try {
@@ -16,77 +15,59 @@ export default async function handler(req, res) {
         const payload = new URLSearchParams();
         payload.append('api_id', GRIEZ_API_ID);
         payload.append('api_key', GRIEZ_API_KEY);
-        payload.append('signature', sign); 
+        payload.append('signature', sign);
         payload.append('status', 'active');
 
         const reqGriez = await fetch(URL_SERVICE, { method: 'POST', body: payload });
         const resGriez = await reqGriez.json();
 
+        // CEK 1: Apakah Griez menolak koneksi?
         if (!resGriez.status || !resGriez.data) {
-            return res.status(500).json({ error: "Gagal ambil data Griez", detail: resGriez });
+            return res.status(500).json({ 
+                error: "Gagal ambil data Griez", 
+                respon_asli: resGriez 
+            });
         }
 
-        const batch = db.batch();
-        let count = 0;
-        let batchCount = 0;
-
-        for (const item of resGriez.data) {
-            // [FIX] Cek apakah ID ada? Jika tidak, skip agar tidak error 'toString'
-            if (!item.id) {
-                console.log("Item Griez tanpa ID dilewati:", item.nama_layanan);
-                continue;
-            }
-
-            const name = (item.nama_layanan || "").toLowerCase();
-            const categoryName = (item.kategori || "").toLowerCase();
-            const priceAsli = parseInt(item.harga);
-            const serviceId = item.id; // ID Integer
-
-            let myCategory = "";
-
-            // --- FILTER KATEGORI ---
-            // 1. Weekly Diamond
-            if (name.includes("weekly") || name.includes("mingguan")) {
-                if (name.includes("brazil") || name.includes("br")) myCategory = "wd_br";
-                else myCategory = "wd_id";
-            }
-            // 2. Mobile Legends
-            else if (categoryName.includes("mobile legend") || name.includes("mobile legend")) {
-                if (name.includes("brazil") || name.includes("br")) myCategory = "mlbb_br";
-                else myCategory = "mlbb";
-            }
-
-            if (myCategory) {
-                const sellingPrice = priceAsli + 1500; // Markup Rp 1.500
-                
-                // Gunakan ID Service sebagai ID Dokumen (dikonversi ke String dengan aman)
-                const docRef = db.collection('products').doc(String(serviceId));
-                
-                batch.set(docRef, {
-                    name: item.nama_layanan,
-                    price: sellingPrice,
-                    price_raw: sellingPrice,
-                    category: myCategory,
-                    service_code: serviceId, // Simpan ID integer ini untuk order nanti
-                    provider: "griez",
-                    description: "Proses Otomatis"
-                });
-
-                count++;
-                batchCount++;
-                if (batchCount >= 400) { await batch.commit(); batchCount = 0; }
-            }
+        // CEK 2: Data ada, tapi kosong?
+        if (resGriez.data.length === 0) {
+            return res.status(200).json({ 
+                success: false, 
+                message: "GriezStore mengembalikan data kosong (0 produk)." 
+            });
         }
 
-        if (batchCount > 0) await batch.commit();
+        // CEK 3: AMBIL SAMPEL KATEGORI & NAMA (DETEKTIF MODE)
+        // Kita ambil semua nama kategori unik untuk dilihat
+        const categoriesFound = new Set();
+        const sampleProducts = [];
 
-        return res.status(200).json({ 
-            success: true, 
-            message: `Sukses Sync! ${count} produk berhasil disimpan.` 
+        // Ambil 10 produk pertama sebagai contoh
+        for (let i = 0; i < Math.min(resGriez.data.length, 10); i++) {
+            const item = resGriez.data[i];
+            categoriesFound.add(item.kategori); // Catat kategorinya
+            sampleProducts.push({
+                nama: item.nama_layanan,
+                kategori: item.kategori,
+                id: item.id
+            });
+        }
+        
+        // Loop semua data cuma buat catat kategori unik lainnya
+        resGriez.data.forEach(item => {
+            if(item.kategori) categoriesFound.add(item.kategori);
+        });
+
+        // TAMPILKAN HASILNYA KE LAYAR
+        return res.status(200).json({
+            success: true,
+            message: "MODE DEBUG: Lihat data di bawah ini untuk memperbaiki filter.",
+            total_produk_griez: resGriez.data.length,
+            daftar_kategori_ditemukan: Array.from(categoriesFound), // <--- INI YG KITA CARI
+            contoh_produk: sampleProducts
         });
 
     } catch (error) {
-        console.error("Sync Error:", error);
-        return res.status(500).json({ error: "Server Error: " + error.message });
+        return res.status(500).json({ error: error.message });
     }
 }
