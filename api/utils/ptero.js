@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { PTERO_CONFIG } from '../config.js';
 
-// Setup Koneksi Axios
+// Setup Koneksi
 const api = axios.create({
     baseURL: PTERO_CONFIG.domain,
     headers: {
@@ -11,7 +11,6 @@ const api = axios.create({
     }
 });
 
-// Fungsi Internal: Ambil Detail Egg (Docker Image & Startup Command)
 async function getEggDetails(nestId, eggId) {
     try {
         const res = await api.get(`/api/application/nests/${nestId}/eggs/${eggId}`);
@@ -21,87 +20,92 @@ async function getEggDetails(nestId, eggId) {
     }
 }
 
-// 1. FUNGSI PASTIKAN USER ADA (User Biasa, Bukan Admin)
-export async function ensurePteroUser(userData) {
+// [BARU] FUNGSI CEK KETERSEDIAAN (Dipakai sebelum Checkout)
+export async function checkPteroAvailability(username, email) {
     try {
-        // Cek user berdasarkan email
-        const search = await api.get(`/api/application/users?filter[email]=${userData.email}`);
-        
-        if (search.data.data.length > 0) {
-            // Jika user sudah ada, kembalikan ID-nya
-            return search.data.data[0].attributes.id;
+        // Cek Username
+        const userCheck = await api.get(`/api/application/users?filter[username]=${username}`);
+        if (userCheck.data.data.length > 0) {
+            return "Username sudah dipakai orang lain!";
         }
 
-        // Jika tidak ada, buat user baru
-        const newUser = await api.post('/api/application/users', {
-            email: userData.email,
-            // Username dibersihkan dari spasi/simbol dan ditambah angka acak agar unik
-            username: userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + Math.floor(Math.random()*100),
-            first_name: userData.username,
-            last_name: "(Customer)",
-            password: userData.password,
-            root_admin: false, // <--- WAJIB FALSE: Agar user tidak punya akses admin panel
-            language: "en"
-        });
+        // Cek Email
+        const emailCheck = await api.get(`/api/application/users?filter[email]=${email}`);
+        if (emailCheck.data.data.length > 0) {
+            return "Email sudah terdaftar di panel!";
+        }
 
-        return newUser.data.attributes.id;
-
+        return null; // Aman (Available)
     } catch (error) {
-        // Log error untuk debugging di Vercel Logs
-        console.error("Gagal Create User Ptero:", error.response?.data || error.message);
-        throw error;
+        console.error("Gagal Cek Ptero:", error.message);
+        return null; // Lanjut saja jika error koneksi, biar webhook yang handle
     }
 }
 
-// 2. FUNGSI BUAT SERVER (Menggunakan Resource dari Database)
-export async function createPteroServer(userId, productType, resources) {
-    try {
-        const config = PTERO_CONFIG.games[productType];
-        if (!config) throw new Error("Tipe game tidak dikenali di config.js");
-
-        // Ambil detail startup command & docker image terbaru dari Panel
-        const eggData = await getEggDetails(config.nestId, config.eggId);
-
-        const payload = {
-            name: `${productType.toUpperCase()} - User ${userId}`,
-            user: userId, // ID User yang baru dibuat/diambil
-            egg: config.eggId,
-            docker_image: eggData.docker_image,
-            startup: eggData.startup,
-            environment: {
-                "BUNGEE_VERSION": "latest",
-                "SERVER_VERSION": "latest",
-                "MINECRAFT_VERSION": "latest",
-                "PMMP_VERSION": "latest",
-                "NUKKIT_VERSION": "latest",
-                "VERSION": "latest"
-            },
-            limits: {
-                // Konversi string ke integer untuk memastikan format benar
-                memory: parseInt(resources.ram),
-                swap: 0,
-                disk: parseInt(resources.disk),
-                io: 500,
-                cpu: parseInt(resources.cpu)
-            },
-            feature_limits: {
-                databases: 1,
-                backups: 0,
-                allocations: 1
-            },
-            // Deploy otomatis ke Node yang tersedia di Location ID tersebut
-            deploy: {
-                locations: [PTERO_CONFIG.locationId],
-                dedicated_ip: false,
-                port_range: []
-            }
-        };
-
-        const res = await api.post('/api/application/servers', payload);
-        return res.data.attributes;
-
-    } catch (error) {
-        console.error("Gagal Create Server Ptero:", error.response?.data || error.message);
-        throw error;
+// FUNGSI CREATE USER (Tanpa Random Number)
+export async function ensurePteroUser(userData) {
+    // Cek user by email (jika lolos cek di atas, berarti ini aman)
+    const search = await api.get(`/api/application/users?filter[email]=${userData.email}`);
+    
+    if (search.data.data.length > 0) {
+        return search.data.data[0].attributes.id;
     }
+
+    // Buat User Baru (Username PERSIS sesuai input)
+    const cleanUsername = userData.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+    const newUser = await api.post('/api/application/users', {
+        email: userData.email,
+        username: cleanUsername, 
+        first_name: userData.username,
+        last_name: "(BuyerVeDollar)",
+        password: userData.password,
+        root_admin: false,
+        language: "en"
+    });
+
+    return newUser.data.attributes.id;
+}
+
+export async function createPteroServer(userId, productType, resources) {
+    const config = PTERO_CONFIG.games[productType];
+    if (!config) throw new Error("Tipe game tidak dikenali");
+
+    const eggData = await getEggDetails(config.nestId, config.eggId);
+
+    const payload = {
+        name: `${productType.toUpperCase()} - User ${userId}`,
+        user: userId,
+        egg: config.eggId,
+        docker_image: eggData.docker_image,
+        startup: eggData.startup,
+        environment: {
+            "BUNGEE_VERSION": "latest",
+            "SERVER_VERSION": "latest",
+            "MINECRAFT_VERSION": "latest",
+            "PMMP_VERSION": "latest",
+            "NUKKIT_VERSION": "latest",
+            "VERSION": "latest"
+        },
+        limits: {
+            memory: parseInt(resources.ram),
+            swap: 0,
+            disk: parseInt(resources.disk),
+            io: 500,
+            cpu: parseInt(resources.cpu)
+        },
+        feature_limits: {
+            databases: 1,
+            backups: 0,
+            allocations: 1
+        },
+        deploy: {
+            locations: [PTERO_CONFIG.locationId],
+            dedicated_ip: false,
+            port_range: []
+        }
+    };
+
+    const res = await api.post('/api/application/servers', payload);
+    return res.data.attributes;
 }
