@@ -14,73 +14,68 @@ export default async function handler(req, res) {
         const orderRef = db.collection('orders').doc(orderId);
         
         try {
-            // Gunakan Transaction agar aman saat rebutan stok
             await db.runTransaction(async (t) => {
                 const orderSnap = await t.get(orderRef);
                 if (!orderSnap.exists) throw "Order not found";
                 
                 const orderData = orderSnap.data();
-                if (orderData.status === 'PAID') return; // Sudah diproses
+                if (orderData.status === 'PAID') return; 
 
                 const cat = orderData.category;
                 const prodId = orderData.productId;
                 
-                let updateData = {
-                    status: 'PAID',
-                    paidAt: new Date().toISOString()
-                };
+                let updateData = { status: 'PAID', paidAt: new Date().toISOString() };
 
-                // --- 1. JIKA APP PREMIUM (AMBIL STOK) ---
+                // 1. APP PREMIUM (POTONG STOK)
                 if (cat === 'app' && prodId) {
                     const prodRef = db.collection('products').doc(prodId);
                     const prodSnap = await t.get(prodRef);
 
                     if (prodSnap.exists) {
                         const currentStock = prodSnap.data().stock || [];
-                        
                         if (currentStock.length > 0) {
-                            // AMBIL STOK PERTAMA (FIFO)
                             const accountToSend = currentStock[0];
-                            
-                            // Hapus dari list (Shift)
                             const newStock = currentStock.slice(1);
-
-                            // Update Database Produk (Kurangi Stok)
                             t.update(prodRef, { stock: newStock });
-
-                            // Simpan Akun ke Order (Untuk ditampilkan ke user)
                             updateData.delivered_account = accountToSend;
                         } else {
-                            updateData.delivered_account = "STOK HABIS SAAT PEMBAYARAN - HUBUNGI ADMIN";
+                            updateData.delivered_account = "STOK HABIS SAAT PROSES. HUBUNGI ADMIN.";
                         }
                     }
                 } 
-                
-                // --- 2. JIKA BOT WA/TG (CREATE SERVER) ---
+                // 2. BOT HOSTING (AUTO CREATE)
                 else if (cat === 'botwa' || cat === 'bottg') {
-                    // Logic Pterodactyl (Biarkan berjalan di background setelah transaksi selesai)
-                    // Kita set data panel URL nanti di luar blok transaction atau update sekarang
-                    // Untuk simplisitas, kita trigger fungsinya tapi update DB dilakukan terpisah atau di sini
                     try {
-                         const pteroResult = await ensurePteroUser({
+                        // A. Buat User Panel & Dapat Username Final
+                        const pteroUser = await ensurePteroUser({
                             email: orderData.email,
                             username: orderData.username,
                             password: orderData.password
                         });
-                        
-                        await createPteroServer(pteroResult.id, cat, {
-                            ram: 1024, cpu: 100, disk: 1000
-                        });
 
+                        // B. SIMPAN DATA PANEL KE DB (PENTING AGAR MUNCUL DI POPUP)
                         updateData.panel_url = process.env.PTERO_URL;
-                        updateData.username = pteroResult.username;
+                        updateData.username = pteroUser.username; // Username hasil Ptero
+                        updateData.password = orderData.password;
+
+                        // C. Buat Server
+                        let ram = 1024, cpu = 100, disk = 1000;
+                        if(prodId) {
+                            const pRef = db.collection('products').doc(prodId);
+                            const pSnap = await t.get(pRef);
+                            if(pSnap.exists) {
+                                const pd = pSnap.data();
+                                ram = pd.ram || 1024; cpu = pd.cpu || 100; disk = pd.disk || 1000;
+                            }
+                        }
+                        await createPteroServer(pteroUser.id, cat, { ram, cpu, disk });
+
                     } catch (err) {
-                        console.error("Gagal Auto Create Server:", err);
-                        // Tetap tandai PAID, nanti admin cek manual jika gagal
+                        console.error("Gagal Create Ptero:", err);
+                        // Data URL tetap tersimpan agar user bisa login manual jika server gagal
                     }
                 }
 
-                // Update Status Order Akhir
                 t.update(orderRef, updateData);
             });
 
@@ -91,6 +86,5 @@ export default async function handler(req, res) {
             return res.status(500).send('Internal Server Error');
         }
     }
-
     return res.status(200).send('Ignored');
 }
