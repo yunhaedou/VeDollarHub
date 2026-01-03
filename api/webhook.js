@@ -1,17 +1,17 @@
 import { db } from './utils/firebase.js';
 import { ensurePteroUser, createPteroServer } from './utils/ptero.js';
+import { orderGriez } from './utils/griez.js'; // Import Helper Baru
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
     const data = req.body;
-    console.log("Webhook:", JSON.stringify(data));
-
     const orderId = data.order_id;
     const status = data.status; 
 
     if (!orderId) return res.status(400).send('No Order ID');
 
+    // Cek status sukses dari Pakasir
     if (status === 'completed' || status === 'success') {
         const orderRef = db.collection('orders').doc(orderId);
         
@@ -22,44 +22,50 @@ export default async function handler(req, res) {
             const orderData = orderSnap.data();
             if (orderData.status === 'PAID') return res.status(200).send('Already Processed');
 
-            // --- 1. PROSES USER PTERODACTYL ---
-            // Kita jalankan ini DULUAN untuk mendapatkan Username Final (misal: caspertes80)
-            let pteroResult = null;
-            try {
-                pteroResult = await ensurePteroUser({
-                    email: orderData.email,
-                    username: orderData.username,
-                    password: orderData.password
-                });
-                
-                // --- 2. BUAT SERVER ---
-                // Gunakan pteroResult.id
-                await createPteroServer(pteroResult.id, orderData.category, {
-                    ram: orderData.ram || 1024,
-                    cpu: orderData.cpu || 100,
-                    disk: orderData.disk || 1000
-                });
-                
-            } catch (err) {
-                console.error("Gagal Ptero:", err);
-                // Lanjut update firebase dulu biar status PAID tetap masuk walau server gagal
+            // --- LOGIKA UTAMA: CEK KATEGORI ---
+            const cat = orderData.category;
+            let finalUsername = orderData.username; // Default
+
+            // 1. JIKA KATEGORI HOSTING (Bot WA/TG)
+            if (cat === 'botwa' || cat === 'bottg') {
+                try {
+                    const pteroResult = await ensurePteroUser({
+                        email: orderData.email,
+                        username: orderData.username,
+                        password: orderData.password
+                    });
+                    
+                    await createPteroServer(pteroResult.id, cat, {
+                        ram: orderData.ram || 1024, cpu: 100, disk: 1000
+                    });
+
+                    finalUsername = pteroResult.username; // Update username jika dirandom
+                } catch (err) {
+                    console.error("Gagal Hosting:", err);
+                }
+            } 
+            
+            // 2. JIKA KATEGORI TOPUP (MLBB, Weekly, dll)
+            else {
+                try {
+                    // Pastikan di database 'products' firebase, ada field 'service_code'
+                    // Contoh: service_code: "ML86"
+                    const serviceCode = orderData.service_code || "CEK_DB"; 
+                    
+                    await orderGriez(serviceCode, orderData.username); // username disini isinya Game ID
+                    console.log("Sukses Topup Griez:", orderData.username);
+
+                } catch (err) {
+                    console.error("Gagal Topup:", err);
+                }
             }
 
-            // --- 3. UPDATE FIREBASE (Status & Username Final) ---
-            // Ini akan mentrigger Frontend untuk menampilkan username yang benar (caspertes80)
+            // --- UPDATE STATUS DI DATABASE ---
             await orderRef.update({ 
                 status: 'PAID', 
                 paidAt: new Date().toISOString(),
-                payment_method: data.payment_method || 'qris',
-                
-                // Simpan URL Panel
-                panel_url: process.env.PTERO_URL, 
-                
-                // [PENTING] Update Username di Database dengan hasil generate Ptero
-                // Jika pteroResult ada, pakai username barunya. Jika gagal, pakai username lama.
-                username: pteroResult ? pteroResult.username : orderData.username, 
-
-                pakasir_data: data
+                username: finalUsername, // Update jika hosting berubah
+                panel_url: (cat === 'botwa' || cat === 'bottg') ? process.env.PTERO_URL : null
             });
 
             return res.status(200).json({ success: true });
@@ -70,5 +76,5 @@ export default async function handler(req, res) {
         }
     }
 
-    return res.status(200).send('Status ignored');
+    return res.status(200).send('Ignored');
 }
