@@ -1,0 +1,11 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron-check",
+      "schedule": "0 0 * * *"
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
+}
