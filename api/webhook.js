@@ -1,90 +1,97 @@
 import { db } from './utils/firebase.js';
-import { ensurePteroUser, createPteroServer } from './utils/ptero.js';
+import { ensurePteroUser, createPteroServer, setServerStatus } from './utils/ptero.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-
     const data = req.body;
-    const orderId = data.order_id;
-    const status = data.status; 
-
-    if (!orderId) return res.status(400).send('No Order ID');
-
-    if (status === 'completed' || status === 'success') {
-        const orderRef = db.collection('orders').doc(orderId);
+    
+    if (data.status === 'completed' || data.status === 'success') {
+        const orderRef = db.collection('orders').doc(data.order_id);
         
         try {
             await db.runTransaction(async (t) => {
-                const orderSnap = await t.get(orderRef);
-                if (!orderSnap.exists) throw "Order not found";
-                
-                const orderData = orderSnap.data();
-                if (orderData.status === 'PAID') return; 
+                const snap = await t.get(orderRef);
+                const order = snap.data();
+                if (order.status === 'PAID') return;
 
-                const cat = orderData.category;
-                const prodId = orderData.productId;
-                
-                let updateData = { status: 'PAID', paidAt: new Date().toISOString() };
-
-                // 1. APP PREMIUM (POTONG STOK)
-                if (cat === 'app' && prodId) {
-                    const prodRef = db.collection('products').doc(prodId);
-                    const prodSnap = await t.get(prodRef);
-
-                    if (prodSnap.exists) {
-                        const currentStock = prodSnap.data().stock || [];
-                        if (currentStock.length > 0) {
-                            const accountToSend = currentStock[0];
-                            const newStock = currentStock.slice(1);
-                            t.update(prodRef, { stock: newStock });
-                            updateData.delivered_account = accountToSend;
-                        } else {
-                            updateData.delivered_account = "STOK HABIS SAAT PROSES. HUBUNGI ADMIN.";
-                        }
+                // --- 1. RENEW SERVER (UNSUSPEND) ---
+                if (order.type === 'renew' && order.renewTarget) {
+                    const subRef = db.collection('active_subs').doc(order.renewTarget);
+                    const subSnap = await t.get(subRef);
+                    
+                    if (subSnap.exists) {
+                        const subData = subSnap.data();
+                        // Panggil Ptero API Unsuspend
+                        await setServerStatus(subData.ptero_server_id, 'unsuspend');
+                        
+                        // Tambah Expired 30 Hari
+                        const newExp = new Date();
+                        newExp.setDate(newExp.getDate() + 30);
+                        
+                        t.update(subRef, { status: 'ACTIVE', expiredAt: newExp.toISOString() });
                     }
-                } 
-                // 2. BOT HOSTING (AUTO CREATE)
-                else if (cat === 'botwa' || cat === 'bottg') {
-                    try {
-                        // A. Buat User Panel & Dapat Username Final
-                        const pteroUser = await ensurePteroUser({
-                            email: orderData.email,
-                            username: orderData.username,
-                            password: orderData.password
-                        });
-
-                        // B. SIMPAN DATA PANEL KE DB (PENTING AGAR MUNCUL DI POPUP)
-                        updateData.panel_url = process.env.PTERO_URL;
-                        updateData.username = pteroUser.username; // Username hasil Ptero
-                        updateData.password = orderData.password;
-
-                        // C. Buat Server
-                        let ram = 1024, cpu = 100, disk = 1000;
-                        if(prodId) {
-                            const pRef = db.collection('products').doc(prodId);
-                            const pSnap = await t.get(pRef);
-                            if(pSnap.exists) {
-                                const pd = pSnap.data();
-                                ram = pd.ram || 1024; cpu = pd.cpu || 100; disk = pd.disk || 1000;
+                }
+                
+                // --- 2. ORDER BARU ---
+                else {
+                    // Logic App Premium (Stok)
+                    if (order.category === 'app') {
+                        const prodRef = db.collection('products').doc(order.productId);
+                        const prodSnap = await t.get(prodRef);
+                        if(prodSnap.exists) {
+                            const stock = prodSnap.data().stock || [];
+                            if(stock.length>0) {
+                                t.update(prodRef, {stock: stock.slice(1)});
+                                t.update(orderRef, {delivered_account: stock[0]});
+                                
+                                // Simpan ke Riwayat (active_subs) juga biar user bisa lihat akunnya
+                                const subRef = db.collection('active_subs').doc();
+                                t.set(subRef, {
+                                    web_uid: order.web_uid,
+                                    username: order.product, // Nama Produk
+                                    password: stock[0], // Data Akun
+                                    category: 'app',
+                                    expiredAt: new Date().toISOString()
+                                });
                             }
                         }
-                        await createPteroServer(pteroUser.id, cat, { ram, cpu, disk });
+                    } 
+                    // Logic Bot Hosting
+                    else if (['botwa', 'bottg'].includes(order.category)) {
+                        // Generate Email Internal agar tidak tabrakan dengan user lain
+                        const internalEmail = `${order.username}@vedollar.id`;
+                        
+                        const pteroUser = await ensurePteroUser({
+                            email: internalEmail,
+                            username: order.username,
+                            password: order.password
+                        });
 
-                    } catch (err) {
-                        console.error("Gagal Create Ptero:", err);
-                        // Data URL tetap tersimpan agar user bisa login manual jika server gagal
+                        // Create Server
+                        const srv = await createPteroServer(pteroUser.id, order.category, {ram:1024, cpu:100, disk:1000});
+
+                        // Simpan Data Langganan (PENTING: Simpan WEB_UID)
+                        const exp = new Date(); exp.setDate(exp.getDate() + 30);
+                        const subRef = db.collection('active_subs').doc(); // Auto ID
+                        
+                        t.set(subRef, {
+                            web_uid: order.web_uid, // ID Akun Web
+                            username: pteroUser.username,
+                            password: order.password,
+                            ptero_server_id: srv.id,
+                            category: order.category,
+                            status: 'ACTIVE',
+                            expiredAt: exp.toISOString()
+                        });
+                        
+                        t.update(orderRef, { panel_url: process.env.PTERO_URL });
                     }
                 }
 
-                t.update(orderRef, updateData);
+                t.update(orderRef, { status: 'PAID', paidAt: new Date().toISOString() });
             });
-
-            return res.status(200).json({ success: true });
-
-        } catch (error) {
-            console.error("Webhook Error:", error);
-            return res.status(500).send('Internal Server Error');
-        }
+            return res.status(200).json({success:true});
+        } catch(e) { console.log(e); return res.status(500).send('Err'); }
     }
-    return res.status(200).send('Ignored');
+    return res.status(200).send('OK');
 }
